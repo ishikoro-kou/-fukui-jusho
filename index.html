@@ -1595,16 +1595,14 @@
         '</div>';
     }
 
-    var landPriceUrl = 'https://www.land.mlit.go.jp/landPrice/AriaServlet?MOD=2&TYP=0';
     var reinfoLibUrl = 'https://www.reinfolib.mlit.go.jp/map/';
     var rosenkaUrl = 'https://www.rosenka.nta.go.jp/main_r08/kanazawa/fukui/prices/city_frm.htm';
     var landSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 地価公示 取引価格');
     var rosenkaSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 路線価');
     content.price =
-      '<p class="note">地価公示・取引価格・路線価は、いずれも住所をピンポイントで直接開けるリンク形式が公開されていないため、市区町村選択画面などの入口へのリンクです。同じ町内でも地点によって金額が異なるため、下記から実際の地番・地区を選んで確認してください。</p>' +
+      '<p class="note">地価公示・取引価格・路線価は、いずれも住所をピンポイントで直接開けるリンク形式が公開されていないため、市区町村選択画面などの入口へのリンクです。同じ町内でも地点によって金額が異なるため、下記から実際の地番・地区を選んで確認してください。<br>※地価公示・都道府県地価調査・取引価格情報は、令和6年度より「不動産情報ライブラリ」に統合されました。</p>' +
       '<div class="links">' +
-      '<a href="' + landPriceUrl + '" target="_blank" rel="noopener">🏛 地価公示・都道府県地価調査（国交省）</a>' +
-      '<a href="' + reinfoLibUrl + '" target="_blank" rel="noopener">🗺 不動産情報ライブラリで地図から探す</a>' +
+      '<a href="' + reinfoLibUrl + '" target="_blank" rel="noopener">🗺 不動産情報ライブラリで地図から探す（地価公示・取引価格）</a>' +
       '<a href="' + rosenkaUrl + '" target="_blank" rel="noopener">📄 路線価図（国税庁・福井県）</a>' +
       '<a href="' + landSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」の地価公示・取引価格を検索</a>' +
       '<a href="' + rosenkaSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」の路線価を検索</a>' +
