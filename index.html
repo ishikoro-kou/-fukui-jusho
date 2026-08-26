@@ -1405,16 +1405,16 @@
   }
 
   // ---------------------------------------------------------------
-  // 1.95) 🗺 周辺・移動情報（バス停・駅・周辺施設・ハザード・距離計算を集約）
+  // 1.95) 🗺 周辺・移動情報（バス停・駅・周辺施設・距離計算を集約）
   //      住所の特定（ジオコーディング）はタブ切り替えの間で1回だけ行い、
-  //      バス停・駅・周辺施設・ハザードマップの4つで使い回す。
+  //      バス停・駅・周辺施設の3つで使い回す。
+  //      ハザードマップは「行政・エリア情報」タブへ移設（規制区域情報という性質が近いため）。
   //      距離計算だけは比較先が別住所になるため、自前で位置特定を行う。
   // ---------------------------------------------------------------
   var MOVE_SUBTABS = [
     { key:'bus',      label:'🚌 バス停' },
     { key:'station',  label:'🚉 駅' },
     { key:'facility', label:'🏪 周辺施設' },
-    { key:'hazard',   label:'🌊 ハザード' },
     { key:'distance', label:'📏 距離計算' }
   ];
 
@@ -1480,10 +1480,6 @@
           renderFacilitySubTabs(holder, origin);
           return;
         }
-        if (key === 'hazard'){
-          renderHazardResult(holder, origin);
-          return;
-        }
       }).then(function(){
         cache.rendered[key] = holder;
       }).catch(function(err){
@@ -1525,7 +1521,7 @@
   //      いずれも市町コードと町名だけで開けるリンク集のため、
   //      ジオコーディング不要で即座に表示できる。
   // ---------------------------------------------------------------
-  function renderAdminPanel(panel, r, city){
+  function renderAdminPanel(panel, r, city, rawQuery){
     var addrLabel = r.city + r.town;
     var cityCore = r.city.replace(/^.*郡/, '');
 
@@ -1592,6 +1588,15 @@
         '<div class="links">' +
         '<a href="https://bunkazai.pref.fukui.lg.jp/buried_map" target="_blank" rel="noopener">🗺 福井県埋蔵文化財遺跡地図</a>' +
         '<a href="' + lawBuriedSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」を検索</a>' +
+        '</div>' +
+
+        '<p style="font-weight:700; color:var(--ink); margin:14px 0 6px;">🏗️ 盛土規制法（宅地造成等工事規制区域・特定盛土等規制区域）</p>' +
+        '<p class="note" style="margin:0 0 8px;">福井県内には（旧法の）「造成宅地防災区域」の指定は現在ありません。代わって令和5年5月施行の盛土規制法に基づき、県内ほぼ全域を対象に新しい規制区域の指定が進められています。</p>' +
+        '<div class="links">' +
+        '<a href="https://www.pref.fukui.lg.jp/doc/tokei/morido/morido.html" target="_blank" rel="noopener">🏛 福井県：盛土規制法について</a>' +
+        (city && city.code === '18201'
+          ? '<a href="https://www.city.fukui.lg.jp/sisei/tkeikaku/tkeikaku/p070584.html" target="_blank" rel="noopener">🏛 福井市：盛土規制法について</a>'
+          : '') +
         '</div>';
     }
 
@@ -1612,6 +1617,7 @@
       { key:'school', label:'🏫 校区' },
       { key:'zone',   label:'🏙 用途地域' },
       { key:'law',    label:'⚖️ 法規制' },
+      { key:'hazard', label:'🌊 ハザード' },
       { key:'price',  label:'💰 地価・路線価' }
     ];
     var tabsHtml = '<div class="subtabs">';
@@ -1623,8 +1629,44 @@
 
     var contentDiv = panel.querySelector('.admin-content');
     var tabs = panel.querySelectorAll('.subtab');
+    var hazardOrigin = null;
+
+    function renderHazardTab(){
+      if (hazardOrigin){
+        renderHazardResult(contentDiv, hazardOrigin);
+        renderSaboLinks(contentDiv);
+        return;
+      }
+      contentDiv.innerHTML = '<div class="bus-loading"><div class="spinner"></div>住所を特定中…</div>';
+      var geoAddr = buildGeoAddress(r, rawQuery || addrLabel);
+      geocodeWithFallback(geoAddr).then(function(origin){
+        hazardOrigin = origin;
+        renderHazardResult(contentDiv, origin);
+        renderSaboLinks(contentDiv);
+      }).catch(function(err){
+        contentDiv.innerHTML =
+          '<p class="bus-error">住所の特定に失敗しました。</p>' +
+          '<p class="bus-error">詳細: ' + escapeHtml(err && err.message ? err.message : String(err)) + '</p>';
+      });
+    }
+
+    function renderSaboLinks(container){
+      var extra = document.createElement('div');
+      extra.innerHTML =
+        '<p style="font-weight:700; color:var(--ink); margin:14px 0 6px;">🏔️ 福井県内の詳しい指定状況（土砂災害・津波）</p>' +
+        '<p class="note" style="margin:0 0 8px;">福井県内は土砂災害警戒区域が11,752箇所、特別警戒区域が10,444箇所指定されています（令和7年1月時点）。上記の全国共通マップに加えて、福井県専用のシステムでも詳細を確認できます。</p>' +
+        '<div class="links">' +
+        '<a href="https://sabo.pref.fukui.lg.jp/" target="_blank" rel="noopener">🏛 福井県 河川・砂防総合情報（土砂災害・津波ハザード情報）</a>' +
+        '</div>';
+      container.appendChild(extra);
+    }
+
     function selectSub(key){
       tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.sub === key); });
+      if (key === 'hazard'){
+        renderHazardTab();
+        return;
+      }
       contentDiv.innerHTML = content[key] || '<p class="note">情報がありません。</p>';
     }
     tabs.forEach(function(t){
@@ -2025,7 +2067,7 @@
           adminPanel.classList.toggle('open');
           if (adminPanel.classList.contains('open') && !adminLoaded){
             adminLoaded = true;
-            renderAdminPanel(adminPanel, r, city);
+            renderAdminPanel(adminPanel, r, city, qInput.value);
           }
           return;
         }
