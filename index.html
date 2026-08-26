@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>福井県 住所リサーチ帳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F1E4;
+    --paper-deep:#EFE7D4;
+    --ink:#22304A;
+    --ink-soft:#5B6478;
+    --line:#D9CDAE;
+    --line-strong:#B9A97E;
+    --red:#C5202E;
+    --red-deep:#96141F;
+    --red-soft:#F1D8D6;
+    --green-stamp:#2F5D4E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(197,32,46,0.05), transparent 40%),
+      radial-gradient(ellipse at bottom right, rgba(47,93,78,0.05), transparent 45%),
+      var(--paper);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    min-height:100vh;
+    padding:32px 16px 64px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+
+  /* ---- header / signature stamp ---- */
+  header{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:28px;
+    padding-bottom:22px;
+    border-bottom:2px solid var(--line-strong);
+    position:relative;
+  }
+  .stamp{
+    flex:0 0 auto;
+    width:64px;height:64px;
+    border-radius:50%;
+    border:2.5px solid var(--red);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    transform:rotate(-6deg);
+  }
+  .stamp::before{
+    content:"";
+    position:absolute;inset:5px;
+    border:1px solid var(--red);
+    border-radius:50%;
+  }
+  .stamp span{
+    font-family:'Shippori Mincho', serif;
+    font-weight:800;
+    font-size:26px;
+    color:var(--red);
+  }
+  h1{
+    font-family:'Shippori Mincho', serif;
+    font-weight:800;
+    font-size:26px;
+    margin:0 0 4px;
+    letter-spacing:.02em;
+  }
+  .sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    letter-spacing:.04em;
+  }
+  .pref-badge{
+    margin-left:auto;
+    font-family:'Shippori Mincho',serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--green-stamp);
+    border:1px solid var(--green-stamp);
+    border-radius:3px;
+    padding:5px 10px;
+    white-space:nowrap;
+    writing-mode:horizontal-tb;
+  }
+
+  /* ---- status / loading ---- */
+  .status{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    min-height:18px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .progress-track{
+    flex:1;
+    height:4px;
+    background:var(--paper-deep);
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--red),var(--green-stamp));
+    transition:width .25s ease;
+  }
+
+  /* ---- feature badges ---- */
+  .feature-badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .feature-badge{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink);
+    background:#FFFDF7;
+    border:1px solid var(--line-strong);
+    border-radius:20px;
+    padding:6px 12px;
+    white-space:nowrap;
+  }
+
+  /* ---- search panel ---- */
+  .panel{
+    background:#FFFDF7;
+    border:1px solid var(--line);
+    border-radius:10px;
+    box-shadow:0 2px 0 var(--line-strong), 0 10px 24px -18px rgba(34,48,74,.4);
+    padding:20px;
+    margin-bottom:20px;
+  }
+  .search-row{
+    display:flex;
+    gap:10px;
+    align-items:stretch;
+  }
+  .search-field{
+    position:relative;
+    flex:1;
+    display:flex;
+    align-items:center;
+  }
+  .search-field::before{
+    content:"〒";
+    position:absolute;
+    left:14px;
+    font-family:'Shippori Mincho',serif;
+    font-weight:700;
+    color:var(--red);
+    font-size:17px;
+    pointer-events:none;
+  }
+  #q{
+    width:100%;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:16px;
+    padding:13px 14px 13px 38px;
+    border:1.5px solid var(--line-strong);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  #q:focus{
+    border-color:var(--red);
+    box-shadow:0 0 0 3px var(--red-soft);
+  }
+  #q::placeholder{color:#A9A18C;}
+
+  .mic-btn{
+    flex:0 0 auto;
+    width:52px;
+    border:1.5px solid var(--line-strong);
+    border-radius:8px;
+    background:#fff;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink);
+    transition:all .15s ease;
+    position:relative;
+  }
+  .mic-btn:hover{border-color:var(--red);}
+  .mic-btn svg{width:20px;height:20px;fill:currentColor;}
+  .mic-btn.listening{
+    background:var(--red);
+    border-color:var(--red);
+    color:#fff;
+    animation:pulse 1.4s infinite;
+  }
+  .mic-btn.unsupported{
+    opacity:.35;
+    cursor:not-allowed;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(197,32,46,.45);}
+    70%{box-shadow:0 0 0 10px rgba(197,32,46,0);}
+    100%{box-shadow:0 0 0 0 rgba(197,32,46,0);}
+  }
+
+  .hint-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    font-size:12px;
+    color:var(--ink-soft);
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .voice-transcript{
+    font-size:12.5px;
+    color:var(--red-deep);
+    min-height:16px;
+  }
+  .clear-btn{
+    background:none;border:none;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:12px;
+    font-family:inherit;
+    padding:0;
+  }
+
+  /* ---- results ---- */
+  .result-meta{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:4px 2px 10px;
+  }
+  .oldname-note{
+    background:#F1E9D8;
+    border:1px solid var(--line-strong);
+    border-radius:8px;
+    padding:8px 12px;
+    margin-bottom:8px;
+    color:var(--ink);
+    font-weight:700;
+    font-size:12.5px;
+  }
+  ul.results{
+    list-style:none;
+    margin:0;padding:0;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    background:#FFFDF7;
+  }
+  ul.results li{
+    border-bottom:1px solid var(--paper-deep);
+  }
+  ul.results li:last-child{border-bottom:none;}
+  .result-row{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    padding:13px 16px;
+    cursor:pointer;
+    transition:background .12s ease;
+  }
+  .row-main{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .row-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+  .result-row:hover{background:var(--paper-deep);}
+  li.copied .result-row{background:var(--red-soft);}
+  .zip{
+    font-family:'Roboto Mono', monospace;
+    font-weight:700;
+    font-size:15px;
+    color:var(--red-deep);
+    flex:0 0 auto;
+    letter-spacing:.02em;
+  }
+  .addr{
+    flex:1;
+    min-width:140px;
+    font-size:14.5px;
+    line-height:1.4;
+  }
+  .addr .city{color:var(--ink-soft); margin-right:4px;}
+  .copy-flag{
+    flex:0 0 auto;
+    font-size:11px;
+    color:var(--green-stamp);
+    font-weight:700;
+    opacity:0;
+    transform:translateY(2px);
+    transition:opacity .15s, transform .15s;
+  }
+  li.copied .copy-flag{opacity:1; transform:translateY(0);}
+
+  /* 詳細パネル共通（校区・用途地域・地価路線価・バス停・駅・周辺施設・
+     ハザード・距離計算・物件概要シートなど、すべての展開パネルで使う） */
+  .info-note{ margin:0 0 10px; line-height:1.6; }
+  .links{ display:flex; flex-wrap:wrap; gap:8px; }
+  .links a{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:#fff;
+    border:1px solid var(--line-strong);
+    color:var(--ink);
+    text-decoration:none;
+    font-size:12px;
+    font-weight:700;
+    padding:7px 11px;
+    border-radius:7px;
+    transition:border-color .12s;
+  }
+  .links a:hover{border-color:var(--red); color:var(--red-deep);}
+
+  .distance-form{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .distance-form input{
+    flex:1;
+    min-width:200px;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:13px;
+    padding:9px 11px;
+    border:1.5px solid var(--line-strong);
+    border-radius:7px;
+    outline:none;
+  }
+  .distance-form input:focus{border-color:#7A3E8A;}
+  .distance-form button{
+    flex:0 0 auto;
+    background:#7A3E8A;
+    border:none;
+    color:#fff;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 14px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .distance-form button:hover{background:#5F2F6C;}
+  .distance-result{
+    background:#fff;
+    border:1px solid var(--line-strong);
+    border-radius:8px;
+    padding:12px 14px;
+  }
+  .distance-result .links a{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:var(--paper-deep);
+    border:1px solid var(--line-strong);
+    color:var(--ink);
+    text-decoration:none;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 10px;
+    border-radius:7px;
+    margin:3px 4px 0 0;
+  }
+  .distance-result .links a:hover{border-color:#7A3E8A; color:#7A3E8A;}
+
+  .note{ margin:0 0 10px; line-height:1.6; }
+
+  .bus-loading{
+    display:flex;align-items:center;gap:8px;
+    color:var(--ink-soft);
+  }
+  .spinner{
+    width:14px;height:14px;
+    border:2px solid var(--line-strong);
+    border-top-color:var(--red-deep);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .bus-stop-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 0;
+    border-bottom:1px solid var(--paper-deep);
+  }
+  .bus-stop-item:last-child{border-bottom:none;}
+  .bus-stop-name{
+    font-weight:700;
+    color:var(--ink);
+    font-size:13px;
+  }
+  .bus-stop-dist{
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+  .bus-stop-item a{
+    flex:0 0 auto;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--green-stamp);
+    border:1px solid var(--green-stamp);
+    border-radius:6px;
+    padding:5px 9px;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .bus-stop-item a:hover{background:var(--green-stamp); color:#fff;}
+  .bus-error{color:var(--red-deep);}
+
+  .station-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 0;
+    border-bottom:1px solid var(--paper-deep);
+  }
+  .station-item:last-child{border-bottom:none;}
+  .station-name{font-weight:700; color:var(--ink); font-size:13px;}
+  .station-dist{font-size:11.5px; color:var(--ink-soft);}
+  .station-item a{
+    flex:0 0 auto;
+    font-size:11.5px;
+    font-weight:700;
+    color:#6B4A9A;
+    border:1px solid #6B4A9A;
+    border-radius:6px;
+    padding:5px 9px;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .station-item a:hover{background:#6B4A9A; color:#fff;}
+
+  /* 展開ボタン共通（物件概要シート・周辺移動情報・行政エリア情報） */
+  .summary-btn, .move-btn, .admin-btn{
+    flex:0 0 auto;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:11.5px;
+    font-weight:700;
+    padding:5px 9px;
+    border-radius:6px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .12s ease;
+  }
+  .summary-btn{ background:var(--ink); border:1px solid var(--ink); color:#fff; }
+  .summary-btn:hover{background:var(--red-deep); border-color:var(--red-deep);}
+  .move-btn{ background:#fff; border:1px solid var(--line-strong); color:#1B5E8A; }
+  .move-btn:hover{background:#1B5E8A; color:#fff; border-color:#1B5E8A;}
+  .admin-btn{ background:#fff; border:1px solid var(--line-strong); color:#8A5A1E; }
+  .admin-btn:hover{background:#8A5A1E; color:#fff; border-color:#8A5A1E;}
+
+  /* 展開パネル共通（開閉・タブ切り替え） */
+  .summary-panel, .move-panel, .admin-panel{
+    display:none;
+    padding:12px 16px 16px 16px;
+    background:#FBF7EC;
+    border-top:1px dashed var(--line);
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .summary-panel.open, .move-panel.open, .admin-panel.open{display:block;}
+  .subtabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-bottom:12px;
+  }
+  .subtab{
+    background:#fff;
+    border:1px solid var(--line-strong);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 11px;
+    border-radius:16px;
+    cursor:pointer;
+  }
+  .subtab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .move-origin-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+  .move-origin-row input{
+    flex:1;
+    min-width:200px;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:13px;
+    padding:9px 11px;
+    border:1.5px solid var(--line-strong);
+    border-radius:7px;
+    outline:none;
+  }
+  .move-origin-row input:focus{border-color:#1B5E8A;}
+  .move-origin-row button{
+    flex:0 0 auto;
+    background:#1B5E8A;
+    border:none;
+    color:#fff;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:12.5px;
+    font-weight:700;
+    padding:9px 14px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .move-origin-row button:hover{background:#123F5E;}
+  .summary-box{
+    background:#fff;
+    border:1px solid var(--line-strong);
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--ink);
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .summary-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .summary-actions button{
+    background:#fff;
+    border:1px solid var(--line-strong);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    padding:7px 12px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .summary-actions button:hover{border-color:var(--red); color:var(--red-deep);}
+
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+  .empty-state .stamp-mini{
+    font-family:'Shippori Mincho',serif;
+    font-size:28px;
+    color:var(--line-strong);
+    margin-bottom:8px;
+  }
+
+  /* ---- history / favorites ---- */
+  .side-panel{
+    background:#FFFDF7;
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .side-tabs{
+    display:flex;
+    border-bottom:1px solid var(--line);
+  }
+  .side-tab{
+    flex:1;
+    background:var(--paper-deep);
+    border:none;
+    padding:9px 10px;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .side-tab.active{
+    background:#FFFDF7;
+    color:var(--red-deep);
+    box-shadow:inset 0 -2px 0 var(--red-deep);
+  }
+  .side-content{
+    padding:10px 14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    min-height:38px;
+    align-items:center;
+  }
+  .side-empty{
+    font-size:12px;
+    color:#A9A18C;
+  }
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--paper-deep);
+    border:1px solid var(--line-strong);
+    border-radius:16px;
+    padding:5px 6px 5px 12px;
+    font-size:12px;
+    color:var(--ink);
+    cursor:pointer;
+    max-width:100%;
+  }
+  .chip:hover{border-color:var(--red);}
+  .chip .chip-x{
+    flex:0 0 auto;
+    width:18px;height:18px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    line-height:1;
+  }
+  .chip .chip-x:hover{background:var(--red-soft); color:var(--red-deep);}
+  .side-clear{
+    margin-left:auto;
+    background:none;border:none;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:11.5px;
+    font-family:inherit;
+  }
+
+  .oldname-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+  }
+  .oldname-table td{
+    padding:8px 6px;
+    border-bottom:1px solid var(--paper-deep);
+    vertical-align:top;
+  }
+  .oldname-new{
+    font-weight:700;
+    color:var(--ink);
+    white-space:nowrap;
+    width:80px;
+  }
+  .oldname-date{
+    color:var(--ink-soft);
+    font-size:11px;
+    white-space:nowrap;
+    width:76px;
+  }
+  .oldname-chip{
+    display:inline-block;
+    background:var(--paper-deep);
+    border:1px solid var(--line-strong);
+    border-radius:12px;
+    padding:3px 9px;
+    margin:2px 4px 2px 0;
+    font-size:11.5px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .oldname-chip:hover{border-color:var(--red); color:var(--red-deep);}
+
+  /* ---- selection toolbar ---- */
+  .selection-toolbar{
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:var(--ink);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:10px;
+    margin-bottom:12px;
+    font-size:13px;
+    flex-wrap:wrap;
+  }
+  .selection-toolbar.show{display:flex;}
+  .selection-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .selection-actions button{
+    background:#fff;
+    border:none;
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    padding:7px 12px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .selection-actions button:hover{background:var(--paper-deep);}
+  #clearSelectionBtn{
+    background:transparent;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.5);
+  }
+  #clearSelectionBtn:hover{background:rgba(255,255,255,.12);}
+
+  /* ---- row checkbox / favorite star ---- */
+  .row-check{
+    flex:0 0 auto;
+    width:17px;height:17px;
+    cursor:pointer;
+    accent-color:var(--red-deep);
+  }
+  .star-btn{
+    flex:0 0 auto;
+    background:none;
+    border:none;
+    font-size:17px;
+    line-height:1;
+    cursor:pointer;
+    color:#C9BE9E;
+    padding:2px;
+  }
+  .star-btn.active{color:#D8A32B;}
+
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block !important; position:absolute; left:0; top:0; width:100%; padding:20px;}
+  }
+
+  footer{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:26px;
+    opacity:.75;
+  }
+  footer a{color:var(--ink-soft);}
+
+  @media (max-width:480px){
+    h1{font-size:21px;}
+    .pref-badge{display:none;}
+    .addr{font-size:13.5px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="stamp"><span>📍</span></div>
+    <div>
+      <h1>福井県 住所リサーチ帳</h1>
+      <div class="sub">住所を起点に、郵便番号・校区・交通・防災・用途地域までまとめて検索</div>
+    </div>
+    <div class="pref-badge">FUKUI 910–919</div>
+  </header>
+
+  <div class="status" id="status">
+    <span id="statusText">データ読み込み準備中…</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="feature-badges">
+    <span class="feature-badge">📋 物件概要シート自動生成</span>
+    <span class="feature-badge">〒 郵便番号 ⇄ 住所</span>
+    <span class="feature-badge">🏫 通学区域（校区）確認</span>
+    <span class="feature-badge">🚌 最寄りバス停・所要時間</span>
+    <span class="feature-badge">🚉 最寄り駅</span>
+    <span class="feature-badge">🏪 周辺施設（コンビニ・スーパー・病院・保育園）</span>
+    <span class="feature-badge">🌊 ハザードマップ</span>
+    <span class="feature-badge">🏙 用途地域・建ぺい率・容積率</span>
+    <span class="feature-badge">⚖️ 法規制（都市計画・農地・森林・文化財）</span>
+    <span class="feature-badge">💰 地価公示・路線価</span>
+    <span class="feature-badge">🔗 検索結果をURLで共有</span>
+    <span class="feature-badge">📏 2地点間の距離・移動時間</span>
+    <span class="feature-badge">🏯 旧市町村名からも検索可</span>
+  </div>
+
+  <div class="panel">
+    <div class="search-row">
+      <div class="search-field">
+        <input id="q" type="text" placeholder="住所（例：福井市中央）または郵便番号（例：9100001）を入力" autocomplete="off" disabled>
+      </div>
+      <button class="mic-btn" id="micBtn" title="音声で検索" disabled>
+        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/></svg>
+      </button>
+    </div>
+    <div class="hint-row">
+      <span class="voice-transcript" id="voiceTranscript"></span>
+      <button class="clear-btn" id="shareUrlBtn">🔗 共有用URLをコピー</button>
+      <button class="clear-btn" id="clearBtn">検索をクリア</button>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="side-tabs">
+      <button type="button" class="side-tab active" data-tab="history">🕘 検索履歴</button>
+      <button type="button" class="side-tab" data-tab="favorites">★ お気に入り</button>
+      <button type="button" class="side-tab" data-tab="oldnames">🏯 旧市町村名</button>
+    </div>
+    <div class="side-content" id="historyContent"></div>
+    <div class="side-content" id="favoritesContent" style="display:none;"></div>
+    <div class="side-content" id="oldnamesContent" style="display:none;"></div>
+  </div>
+
+  <div class="selection-toolbar" id="selectionToolbar">
+    <span id="selectionCount">0件選択中</span>
+    <div class="selection-actions">
+      <button type="button" id="copySelectedBtn">📋 まとめてコピー</button>
+      <button type="button" id="printSelectedBtn">🖨 印刷用に表示</button>
+      <button type="button" id="clearSelectionBtn">選択解除</button>
+    </div>
+  </div>
+
+  <div class="result-meta" id="resultMeta"></div>
+  <ul class="results" id="results"></ul>
+
+  <footer>
+    住所データ: <a href="https://github.com/yubinbango/yubinbango-data" target="_blank" rel="noopener">yubinbango-data</a>（日本郵便公開データを加工）／
+    住所検索: 国土地理院 ジオコーディングAPI／バス停・駅データ: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>（Overpass API）／
+    ハザード情報: <a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener">重ねるハザードマップ</a>（国土地理院）
+    <br>キーボード・音声入力とも、ブラウザ内で完結し外部送信はありません（バス停・駅・ハザードマップ検索時のみ上記APIへ通信します）
+  </footer>
+</div>
+
+<div id="printArea" style="display:none;"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------------------------------------------------------
+  // 1) データ読み込み（福井県の郵便番号は 910xxxx〜919xxxx の範囲）
+  //    yubinbango-data の JSONP 形式ファイルをブラウザが直接取得する
+  // ---------------------------------------------------------------
+  var PREFIXES = ['910','911','912','913','914','915','916','917','918','919'];
+  var allRecords = [];
+  var statusText = document.getElementById('statusText');
+  var progressFill = document.getElementById('progressFill');
+  var qInput = document.getElementById('q');
+  var micBtn = document.getElementById('micBtn');
+
+  function loadPrefix(prefix){
+    return new Promise(function(resolve){
+      var finished = false;
+      window.$yubin = function(data){
+        if (finished) return;
+        finished = true;
+        if (data && typeof data === 'object'){
+          for (var zip in data){
+            if (!Object.prototype.hasOwnProperty.call(data, zip)) continue;
+            var v = data[zip];
+            if (!v) continue;
+            // v = [regionId, city, town, extended]
+            allRecords.push({
+              zip: zip,
+              city: v[1] || '',
+              town: v[2] || '',
+              ext: v[3] || ''
+            });
+          }
+        }
+        resolve();
+      };
+      var s = document.createElement('script');
+      s.src = 'https://yubinbango.github.io/yubinbango-data/data/' + prefix + '.js';
+      s.onerror = function(){
+        if (finished) return;
+        finished = true;
+        resolve();
+      };
+      document.body.appendChild(s);
+      // タイムアウト保険（回線不良時に固まらないように）
+      setTimeout(function(){
+        if (!finished){ finished = true; resolve(); }
+      }, 8000);
+    });
+  }
+
+  async function loadAll(){
+    for (var i=0;i<PREFIXES.length;i++){
+      var p = PREFIXES[i];
+      statusText.textContent = '読み込み中… ' + p + ' (' + (i+1) + '/' + PREFIXES.length + ')';
+      progressFill.style.width = Math.round((i/PREFIXES.length)*100) + '%';
+      await loadPrefix(p);
+    }
+    progressFill.style.width = '100%';
+    // 重複除去
+    var seen = {};
+    allRecords = allRecords.filter(function(r){
+      var key = r.zip + '|' + r.town + '|' + r.ext;
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+    allRecords.sort(function(a,b){ return a.zip.localeCompare(b.zip); });
+
+    if (allRecords.length === 0){
+      statusText.textContent = 'データの取得に失敗しました。通信環境をご確認のうえ再読み込みしてください。';
+      progressFill.style.background = '#C5202E';
+    } else {
+      statusText.textContent = allRecords.length.toLocaleString() + ' 件の住所データを読み込みました（福井県 全域・住所⇄郵便番号 検索可）';
+      qInput.disabled = false;
+      setupSpeech();
+      var initialQuery = getInitialQueryFromUrl();
+      if (initialQuery){
+        qInput.value = initialQuery;
+        render(search(initialQuery), initialQuery.trim());
+      } else {
+        qInput.focus();
+        render(allRecords.slice(0, 60), '');
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // 1.5) 校区（通学区域）確認リンク用：福井県内17市町の全国地方公共団体コード
+  //      ※ 通学区域そのものは市町教育委員会が個別管理しており、番地単位で
+  //         校区が分かれる例もあるため、断定データではなく一次情報への
+  //         リンクを提供する（学区マップ／教育委員会検索の2経路）
+  // ---------------------------------------------------------------
+  var CITY_CODES = [
+    { core:'福井市',     code:'18201', planUrl:'https://www.fukui-toshikei.com/' },
+    { core:'敦賀市',     code:'18202' },
+    { core:'小浜市',     code:'18204' },
+    { core:'大野市',     code:'18205' },
+    { core:'勝山市',     code:'18206' },
+    { core:'鯖江市',     code:'18207' },
+    { core:'あわら市',   code:'18208' },
+    { core:'越前市',     code:'18209' },
+    { core:'坂井市',     code:'18210', planUrl:'https://www.city.fukui-sakai.lg.jp/johotokei/shisei/joho/webmap/sakaishi-webmap.html' },
+    { core:'永平寺町',   code:'18322' },
+    { core:'池田町',     code:'18382' },
+    { core:'南越前町',   code:'18404' },
+    { core:'越前町',     code:'18423' },
+    { core:'美浜町',     code:'18442' },
+    { core:'高浜町',     code:'18481' },
+    { core:'おおい町',   code:'18483' },
+    { core:'若狭町',     code:'18501' }
+  ];
+  function findCity(cityStr){
+    for (var i=0;i<CITY_CODES.length;i++){
+      if (cityStr && cityStr.indexOf(CITY_CODES[i].core) !== -1) return CITY_CODES[i];
+    }
+    return null;
+  }
+
+  // ---------------------------------------------------------------
+  // 1.55) 旧市町村名（平成の大合併で消滅した市町村）からの検索対応
+  //      坂井市の旧4町（三国町・丸岡町・春江町・坂井町）は例外で、
+  //      合併後も「坂井市三国町〇〇」のように旧町名が住所にそのまま
+  //      残っているため、通常の部分一致検索で既にヒットする（変換不要）。
+  //      それ以外の合併では旧市町村名が住所から完全に消えているため、
+  //      「旧名→現市町名」に変換してから検索する。
+  // ---------------------------------------------------------------
+  var OLD_NAME_MAP = [
+    { old:'武生市',   new:'越前市',   date:'2005.10.1' },
+    { old:'今立町',   new:'越前市',   date:'2005.10.1' },
+    { old:'芦原町',   new:'あわら市', date:'2004.3.1'  },
+    { old:'金津町',   new:'あわら市', date:'2004.3.1'  },
+    { old:'南条町',   new:'南越前町', date:'2005.1.1'  },
+    { old:'今庄町',   new:'南越前町', date:'2005.1.1'  },
+    { old:'河野村',   new:'南越前町', date:'2005.1.1'  },
+    { old:'朝日町',   new:'越前町',   date:'2005.2.1'  },
+    { old:'宮崎村',   new:'越前町',   date:'2005.2.1'  },
+    { old:'織田町',   new:'越前町',   date:'2005.2.1'  },
+    { old:'三方町',   new:'若狭町',   date:'2005.3.31' },
+    { old:'上中町',   new:'若狭町',   date:'2005.3.31' },
+    { old:'和泉村',   new:'大野市',   date:'2005.11.7' },
+    { old:'美山町',   new:'福井市',   date:'2006.2.1'  },
+    { old:'清水町',   new:'福井市',   date:'2006.2.1'  },
+    { old:'越廼村',   new:'福井市',   date:'2006.2.1'  },
+    { old:'松岡町',   new:'永平寺町', date:'2006.2.13' },
+    { old:'上志比村', new:'永平寺町', date:'2006.2.13' },
+    { old:'名田庄村', new:'おおい町', date:'2006.3.3'  },
+    { old:'大飯町',   new:'おおい町', date:'2006.3.3'  },
+    { old:'三国町',   new:'坂井市',   date:'2006.3.20' },
+    { old:'丸岡町',   new:'坂井市',   date:'2006.3.20' },
+    { old:'春江町',   new:'坂井市',   date:'2006.3.20' },
+    { old:'坂井町',   new:'坂井市',   date:'2006.3.20' }
+  ];
+  var OLD_NAME_MAP_SORTED = OLD_NAME_MAP.slice().sort(function(a,b){ return b.old.length - a.old.length; });
+
+  function resolveOldName(raw){
+    for (var i=0;i<OLD_NAME_MAP_SORTED.length;i++){
+      var entry = OLD_NAME_MAP_SORTED[i];
+      if (raw.indexOf(entry.old) === 0){
+        return { text: entry.new + raw.slice(entry.old.length), old: entry.old, newCity: entry.new };
+      }
+    }
+    return null;
+  }
+
+  // ---------------------------------------------------------------
+  // 1.6) 最寄りバス停：住所→緯度経度（国土地理院 ジオコーディングAPI）
+  //      →周辺バス停（OpenStreetMap Overpass API）→直線距離・徒歩分数
+  //      どちらも無料・登録不要のAPIだが、精度は公式ルート検索に劣るため
+  //      「概算」であることを明示し、正確な時間はGoogle Mapsへのリンクで補う。
+  // ---------------------------------------------------------------
+  function buildGeoAddress(r, rawQuery){
+    var q = (rawQuery || '').trim();
+    // 入力欄にすでに「福井県」が含まれている場合は、二重に付与しないよう一旦取り除く
+    q = q.replace(/^福井県[\s\u3000]*/, '');
+    var cityCore = r.city.replace(/^.*郡/, '');
+    var addr = '福井県';
+    if (q && q.indexOf(r.city) === -1 && q.indexOf(cityCore) === -1){
+      addr += r.city;
+    }
+    addr += (q || (r.city + r.town));
+    return addr;
+  }
+
+  function geocodeAddress(address){
+    var url = 'https://msearch.gsi.go.jp/address-search/AddressSearch?q=' + encodeURIComponent(address);
+    return fetch(url).then(function(res){
+      if (!res.ok) throw new Error('住所検索APIがエラーを返しました（HTTP ' + res.status + '）');
+      return res.json();
+    }, function(networkErr){
+      throw new Error('住所検索APIに接続できませんでした（' + (networkErr && networkErr.message ? networkErr.message : '通信エラー') + '）。ブラウザやネットワークが msearch.gsi.go.jp への通信をブロックしている可能性があります。');
+    }).then(function(data){
+      if (!data || data.length === 0) throw new Error('「' + address + '」に該当する住所が見つかりませんでした');
+      var coords = data[0].geometry.coordinates; // [lon, lat]
+      return { lat: coords[1], lon: coords[0], title: (data[0].properties && data[0].properties.title) || address };
+    });
+  }
+
+  // 住所検索APIは丁目レベルまでは強いが、番地（例:「2-20」）単位の位置情報までは
+  // 持っていないことが多い。番地・号・丁目の順に段階的に切り詰めながら再試行し、
+  // 見つかった時点のレベル（例：丁目まで）で位置を確定させる。
+  function addressFallbackChain(address){
+    var chain = [address];
+    var s = address;
+    while (true){
+      var next = s.replace(/[0-9０-９]+(丁目|番地|号|番)?[\-‐−]?[0-9０-９]*$/, '').trim();
+      if (!next || next === s) break;
+      chain.push(next);
+      s = next;
+    }
+    return chain;
+  }
+
+  function geocodeWithFallback(address){
+    var chain = addressFallbackChain(address);
+    var i = 0;
+    var lastErr = null;
+    function attempt(){
+      if (i >= chain.length) return Promise.reject(lastErr || new Error('住所を特定できませんでした'));
+      return geocodeAddress(chain[i]).then(function(origin){
+        origin.approximated = (i > 0); // 番地等を切り詰めた位置であることの目印
+        return origin;
+      }).catch(function(err){
+        lastErr = err;
+        i++;
+        return attempt();
+      });
+    }
+    return attempt();
+  }
+
+  function haversineMeters(lat1, lon1, lat2, lon2){
+    var R = 6371000;
+    var toRad = function(d){ return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)*Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function walkMinutes(meters){
+    return Math.max(1, Math.round(meters / 80)); // 徒歩分速約80m(時速4.8km)の概算
+  }
+
+  // overpass-api.de（本家）が混雑・不調で接続できない場合に備え、
+  // 複数の無料公開ミラーサーバーを順番に試す
+  var OVERPASS_ENDPOINTS = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://lz4.overpass-api.de/api/interpreter'
+  ];
+
+  function overpassFetch(query){
+    var i = 0;
+    var lastErr = null;
+    function tryEndpoint(){
+      if (i >= OVERPASS_ENDPOINTS.length) return Promise.reject(lastErr || new Error('すべてのバス停検索サーバーに接続できませんでした'));
+      var endpoint = OVERPASS_ENDPOINTS[i];
+      var url = endpoint + '?data=' + encodeURIComponent(query);
+      return fetch(url).then(function(res){
+        if (!res.ok) throw new Error('バス停検索API（' + endpoint + '）がエラーを返しました（HTTP ' + res.status + '）');
+        return res.json();
+      }, function(networkErr){
+        throw new Error('バス停検索API（' + endpoint + '）に接続できませんでした（' + (networkErr && networkErr.message ? networkErr.message : '通信エラー') + '）');
+      }).catch(function(err){
+        lastErr = err;
+        i++;
+        return tryEndpoint();
+      });
+    }
+    return tryEndpoint();
+  }
+
+  function fetchNearbyBusStops(lat, lon){
+    var radii = [800, 1500, 3000];
+    var i = 0;
+    function tryRadius(){
+      if (i >= radii.length) return Promise.resolve({ stops: [], radius: radii[radii.length-1], unavailable: false });
+      var r = radii[i];
+      var q = '[out:json][timeout:15];' +
+        '(node(around:' + r + ',' + lat + ',' + lon + ')["highway"="bus_stop"];' +
+        'node(around:' + r + ',' + lat + ',' + lon + ')["public_transport"="platform"]["bus"="yes"];' +
+        ');out body;';
+      return overpassFetch(q).then(function(data){
+        var els = (data && data.elements) || [];
+        if (els.length === 0){
+          i++;
+          return tryRadius();
+        }
+        var seen = {};
+        var stops = [];
+        els.forEach(function(el){
+          if (typeof el.lat !== 'number' || typeof el.lon !== 'number') return;
+          var name = (el.tags && (el.tags.name || el.tags['name:ja'])) || '名称不明のバス停';
+          var key = name + '|' + el.lat.toFixed(4) + '|' + el.lon.toFixed(4);
+          if (seen[key]) return;
+          seen[key] = true;
+          stops.push({ name: name, lat: el.lat, lon: el.lon, dist: haversineMeters(lat, lon, el.lat, el.lon) });
+        });
+        stops.sort(function(a,b){ return a.dist - b.dist; });
+        return { stops: stops.slice(0, 5), radius: r, unavailable: false };
+      });
+    }
+    // Overpass系サーバー全てに接続できない環境があるため、失敗してもエラーにはせず
+    // 「自動検索は使えなかった」フラグを立てて Google Maps 誘導にフォールバックする
+    return tryRadius().catch(function(err){
+      return { stops: [], radius: radii[radii.length-1], unavailable: true, unavailableReason: (err && err.message) || String(err) };
+    });
+  }
+
+  function renderBusResult(panel, origin, result, geoAddr){
+    var addrForSearch = origin.title || geoAddr;
+    var mapsSearchUrl = 'https://www.google.com/maps/search/' + encodeURIComponent('バス停 ' + addrForSearch);
+
+    if (result.unavailable){
+      // Overpass系サーバーに接続できない環境向けのフォールバック表示
+      var html0 = '<p class="note">位置は「' + escapeHtml(origin.title) + '」として特定できました。ただしこの環境からはバス停の自動検索サーバー（Overpass API）に接続できませんでした。</p>';
+      html0 += '<p class="note" style="font-size:11.5px;">詳細: ' + escapeHtml(result.unavailableReason || '') + '</p>';
+      html0 += '<div class="links"><a href="' + mapsSearchUrl + '" target="_blank" rel="noopener">🚏 Google Mapsでバス停を探す</a></div>';
+      panel.innerHTML = html0;
+      return;
+    }
+
+    var html = '<p class="note">「' + escapeHtml(origin.title) + '」を基準に検索（半径約' + result.radius + 'm、直線距離ベースの概算です）。</p>';
+    if (origin.approximated){
+      html = '<p class="note">番地までの位置情報が見つからなかったため、「' + escapeHtml(origin.title) + '」（町名・丁目レベル）を基準に検索しています。半径約' + result.radius + 'm、直線距離ベースの概算です。</p>';
+    }
+    if (result.stops.length === 0){
+      html += '<p class="bus-error">周辺にOpenStreetMap上のバス停データが見つかりませんでした。地図データの登録状況による可能性があります。</p>';
+      html += '<div class="links"><a href="' + mapsSearchUrl + '" target="_blank" rel="noopener">🚏 Google Mapsでバス停を探す</a></div>';
+    } else {
+      html += '<div class="bus-stop-list">';
+      result.stops.forEach(function(s){
+        var mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + origin.lat + ',' + origin.lon +
+          '&destination=' + s.lat + ',' + s.lon + '&travelmode=walking';
+        html +=
+          '<div class="bus-stop-item">' +
+            '<div><div class="bus-stop-name">🚌 ' + escapeHtml(s.name) + '</div>' +
+            '<div class="bus-stop-dist">直線約' + Math.round(s.dist) + 'm ／ 徒歩約' + walkMinutes(s.dist) + '分（概算）</div></div>' +
+            '<a href="' + mapsUrl + '" target="_blank" rel="noopener">正確なルート</a>' +
+          '</div>';
+      });
+      html += '</div>';
+      html += '<p class="note" style="margin-top:10px;">徒歩時間は直線距離からの概算です。実際の道順・正確な所要時間は各バス停の「正確なルート」からGoogle Mapsでご確認ください。</p>';
+    }
+    panel.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------
+  // 1.7) 最寄り駅（JR／えちぜん鉄道／福井鉄道 等）
+  //      バス停と同じ仕組み（Overpass API → 見つからなければGoogle Mapsへ誘導）を流用
+  // ---------------------------------------------------------------
+  function fetchNearbyStations(lat, lon){
+    var radii = [1500, 3000, 6000];
+    var i = 0;
+    function tryRadius(){
+      if (i >= radii.length) return Promise.resolve({ stations: [], radius: radii[radii.length-1], unavailable: false });
+      var r = radii[i];
+      var q = '[out:json][timeout:15];' +
+        '(node(around:' + r + ',' + lat + ',' + lon + ')["railway"="station"];' +
+        'node(around:' + r + ',' + lat + ',' + lon + ')["railway"="halt"];' +
+        'node(around:' + r + ',' + lat + ',' + lon + ')["railway"="tram_stop"];' +
+        ');out body;';
+      return overpassFetch(q).then(function(data){
+        var els = (data && data.elements) || [];
+        if (els.length === 0){
+          i++;
+          return tryRadius();
+        }
+        var seen = {};
+        var stations = [];
+        els.forEach(function(el){
+          if (typeof el.lat !== 'number' || typeof el.lon !== 'number') return;
+          var name = (el.tags && (el.tags.name || el.tags['name:ja'])) || '名称不明の駅';
+          var line = (el.tags && (el.tags['network'] || el.tags['operator'])) || '';
+          var key = name + '|' + el.lat.toFixed(4) + '|' + el.lon.toFixed(4);
+          if (seen[key]) return;
+          seen[key] = true;
+          stations.push({ name: name, line: line, lat: el.lat, lon: el.lon, dist: haversineMeters(lat, lon, el.lat, el.lon) });
+        });
+        stations.sort(function(a,b){ return a.dist - b.dist; });
+        return { stations: stations.slice(0, 5), radius: r, unavailable: false };
+      });
+    }
+    return tryRadius().catch(function(err){
+      return { stations: [], radius: radii[radii.length-1], unavailable: true, unavailableReason: (err && err.message) || String(err) };
+    });
+  }
+
+  function renderStationResult(panel, origin, result, geoAddr){
+    var addrForSearch = origin.title || geoAddr;
+    var mapsSearchUrl = 'https://www.google.com/maps/search/' + encodeURIComponent('駅 ' + addrForSearch);
+
+    if (result.unavailable){
+      var html0 = '<p class="note">位置は「' + escapeHtml(origin.title) + '」として特定できました。ただしこの環境からは駅の自動検索サーバー（Overpass API）に接続できませんでした。</p>';
+      html0 += '<div class="links"><a href="' + mapsSearchUrl + '" target="_blank" rel="noopener">🚉 Google Mapsで駅を探す</a></div>';
+      panel.innerHTML = html0;
+      return;
+    }
+
+    var html = '<p class="note">「' + escapeHtml(origin.title) + '」を基準に検索（半径約' + result.radius + 'm、直線距離ベースの概算です）。福井県内はJR・えちぜん鉄道・福井鉄道が対象です。</p>';
+    if (origin.approximated){
+      html = '<p class="note">番地までの位置情報が見つからなかったため、「' + escapeHtml(origin.title) + '」（町名・丁目レベル）を基準に検索しています。半径約' + result.radius + 'mです。</p>';
+    }
+    if (result.stations.length === 0){
+      html += '<p class="bus-error">周辺にOpenStreetMap上の駅データが見つかりませんでした。</p>';
+      html += '<div class="links"><a href="' + mapsSearchUrl + '" target="_blank" rel="noopener">🚉 Google Mapsで駅を探す</a></div>';
+    } else {
+      html += '<div class="station-list">';
+      result.stations.forEach(function(s){
+        var mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + origin.lat + ',' + origin.lon +
+          '&destination=' + s.lat + ',' + s.lon + '&travelmode=walking';
+        html +=
+          '<div class="station-item">' +
+            '<div><div class="station-name">🚉 ' + escapeHtml(s.name) + (s.line ? '（' + escapeHtml(s.line) + '）' : '') + '</div>' +
+            '<div class="station-dist">直線約' + Math.round(s.dist) + 'm ／ 徒歩約' + walkMinutes(s.dist) + '分（概算）</div></div>' +
+            '<a href="' + mapsUrl + '" target="_blank" rel="noopener">正確なルート</a>' +
+          '</div>';
+      });
+      html += '</div>';
+      html += '<p class="note" style="margin-top:10px;">徒歩時間は直線距離からの概算です。実際の道順は各駅の「正確なルート」からGoogle Mapsでご確認ください。</p>';
+    }
+    panel.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------
+  // 1.75) 周辺施設検索（コンビニ・スーパー・病院・保育園/幼稚園）
+  //      バス停・駅と同じ仕組みを再利用。カテゴリはタブで切り替え、
+  //      一度取得した住所（origin）は同じ結果パネル内で使い回す。
+  // ---------------------------------------------------------------
+  var FACILITY_CATEGORIES = [
+    { key:'convenience',  label:'🏪 コンビニ',       osm:['shop=convenience'] },
+    { key:'supermarket',  label:'🛒 スーパー',       osm:['shop=supermarket'] },
+    { key:'hospital',     label:'🏥 病院・クリニック', osm:['amenity=hospital','amenity=clinic'] },
+    { key:'kindergarten', label:'🧸 保育園・幼稚園',  osm:['amenity=kindergarten'] }
+  ];
+
+  function fetchNearbyFacilities(lat, lon, osmTags){
+    var radii = [1000, 2000, 4000];
+    var i = 0;
+    function tryRadius(){
+      if (i >= radii.length) return Promise.resolve({ items: [], radius: radii[radii.length-1], unavailable:false });
+      var r = radii[i];
+      var clauses = osmTags.map(function(tag){
+        var parts = tag.split('=');
+        return 'node(around:' + r + ',' + lat + ',' + lon + ')["' + parts[0] + '"="' + parts[1] + '"];';
+      }).join('');
+      var q = '[out:json][timeout:15];(' + clauses + ');out body;';
+      return overpassFetch(q).then(function(data){
+        var els = (data && data.elements) || [];
+        if (els.length === 0){
+          i++;
+          return tryRadius();
+        }
+        var seen = {};
+        var items = [];
+        els.forEach(function(el){
+          if (typeof el.lat !== 'number' || typeof el.lon !== 'number') return;
+          var name = (el.tags && (el.tags.name || el.tags['name:ja'])) || '名称不明';
+          var key = name + '|' + el.lat.toFixed(4) + '|' + el.lon.toFixed(4);
+          if (seen[key]) return;
+          seen[key] = true;
+          items.push({ name: name, lat: el.lat, lon: el.lon, dist: haversineMeters(lat, lon, el.lat, el.lon) });
+        });
+        items.sort(function(a,b){ return a.dist - b.dist; });
+        return { items: items.slice(0, 6), radius: r, unavailable: false };
+      });
+    }
+    return tryRadius().catch(function(err){
+      return { items: [], radius: radii[radii.length-1], unavailable: true, unavailableReason: (err && err.message) || String(err) };
+    });
+  }
+
+  function renderFacilityResult(container, origin, result, catLabel){
+    var plainLabel = catLabel.replace(/^\S+\s*/, '');
+    var mapsSearchUrl = 'https://www.google.com/maps/search/' + encodeURIComponent(plainLabel + ' ' + origin.title);
+
+    if (result.unavailable){
+      container.innerHTML =
+        '<p class="note">位置は「' + escapeHtml(origin.title) + '」として特定できました。ただしこの環境からは施設検索サーバー（Overpass API）に接続できませんでした。</p>' +
+        '<div class="links"><a href="' + mapsSearchUrl + '" target="_blank" rel="noopener">🔎 Google Mapsで' + escapeHtml(plainLabel) + 'を探す</a></div>';
+      return;
+    }
+
+    var html = '<p class="note">「' + escapeHtml(origin.title) + '」を基準に検索（半径約' + result.radius + 'm、直線距離ベースの概算です）。</p>';
+    if (result.items.length === 0){
+      html += '<p class="bus-error">周辺にOpenStreetMap上の' + escapeHtml(plainLabel) + 'データが見つかりませんでした。</p>';
+      html += '<div class="links"><a href="' + mapsSearchUrl + '" target="_blank" rel="noopener">🔎 Google Mapsで' + escapeHtml(plainLabel) + 'を探す</a></div>';
+    } else {
+      html += '<div class="bus-stop-list">';
+      result.items.forEach(function(it){
+        var mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + origin.lat + ',' + origin.lon +
+          '&destination=' + it.lat + ',' + it.lon + '&travelmode=walking';
+        html +=
+          '<div class="bus-stop-item">' +
+            '<div><div class="bus-stop-name">' + escapeHtml(it.name) + '</div>' +
+            '<div class="bus-stop-dist">直線約' + Math.round(it.dist) + 'm ／ 徒歩約' + walkMinutes(it.dist) + '分（概算）</div></div>' +
+            '<a href="' + mapsUrl + '" target="_blank" rel="noopener">正確なルート</a>' +
+          '</div>';
+      });
+      html += '</div>';
+      html += '<p class="note" style="margin-top:10px;">徒歩時間は直線距離からの概算です。実際の道順は各施設の「正確なルート」からGoogle Mapsでご確認ください。</p>';
+    }
+    container.innerHTML = html;
+  }
+
+  // origin（緯度経度）が既に分かっている前提で、カテゴリタブだけを描画する。
+  // 「周辺・移動情報」パネル内で使う（住所の特定は呼び出し元で1回だけ行う）。
+  function renderFacilitySubTabs(container, origin){
+    var cache = { results: {} };
+    var tabsHtml = '<div class="subtabs">';
+    FACILITY_CATEGORIES.forEach(function(cat, idx){
+      tabsHtml += '<button type="button" class="subtab' + (idx === 0 ? ' active' : '') + '" data-cat="' + cat.key + '">' + cat.label + '</button>';
+    });
+    tabsHtml += '</div><div class="facility-result"></div>';
+    container.innerHTML = tabsHtml;
+
+    var resultDiv = container.querySelector('.facility-result');
+    var tabs = container.querySelectorAll('.subtab');
+
+    function selectCategory(key){
+      tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.cat === key); });
+      var cat = FACILITY_CATEGORIES.filter(function(c){ return c.key === key; })[0];
+      if (cache.results[key]){
+        renderFacilityResult(resultDiv, origin, cache.results[key], cat.label);
+        return;
+      }
+      resultDiv.innerHTML = '<div class="bus-loading"><div class="spinner"></div>' + cat.label + 'を検索中…</div>';
+      fetchNearbyFacilities(origin.lat, origin.lon, cat.osm).then(function(result){
+        cache.results[key] = result;
+        renderFacilityResult(resultDiv, origin, result, cat.label);
+      });
+    }
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(e){
+        e.stopPropagation();
+        selectCategory(t.dataset.cat);
+      });
+    });
+
+    selectCategory(FACILITY_CATEGORIES[0].key);
+  }
+
+  // ---------------------------------------------------------------
+  // 1.8) ハザードマップ（重ねるハザードマップ／国土地理院）
+  //      origin（緯度経度）はすでに分かっている前提でリンクだけを表示する。
+  // ---------------------------------------------------------------
+  function renderHazardResult(container, origin){
+    var url = 'https://disaportal.gsi.go.jp/maps/?ll=' + origin.lat + ',' + origin.lon + '&z=17&base=pale&vs=c1j0l0u0t0h0z0';
+    var noteApprox = origin.approximated
+      ? '<p class="note">番地までの位置情報が見つからなかったため、「' + escapeHtml(origin.title) + '」（町名・丁目レベル）を基準にしています。</p>'
+      : '';
+    container.innerHTML =
+      '<p class="note">「' + escapeHtml(origin.title) + '」を中心にハザードマップを開きます。洪水・土砂災害・津波等のレイヤーは地図上部のメニューから切り替えられます。</p>' +
+      noteApprox +
+      '<div class="links"><a href="' + url + '" target="_blank" rel="noopener">🌊 重ねるハザードマップを開く</a></div>';
+  }
+
+  // ---------------------------------------------------------------
+  // 1.95) 🗺 周辺・移動情報（バス停・駅・周辺施設・ハザード・距離計算を集約）
+  //      住所の特定（ジオコーディング）はタブ切り替えの間で1回だけ行い、
+  //      バス停・駅・周辺施設・ハザードマップの4つで使い回す。
+  //      距離計算だけは比較先が別住所になるため、自前で位置特定を行う。
+  // ---------------------------------------------------------------
+  var MOVE_SUBTABS = [
+    { key:'bus',      label:'🚌 バス停' },
+    { key:'station',  label:'🚉 駅' },
+    { key:'facility', label:'🏪 周辺施設' },
+    { key:'hazard',   label:'🌊 ハザード' },
+    { key:'distance', label:'📏 距離計算' }
+  ];
+
+  function renderMovePanel(panel, r, rawQuery){
+    var cache = { origin: null, rendered: {} };
+    var originDefault = buildGeoAddress(r, rawQuery);
+
+    var tabsHtml =
+      '<div class="move-origin-row">' +
+        '<input type="text" class="move-origin-input" value="' + escapeHtml(originDefault) + '" placeholder="起点の住所">' +
+        '<button type="button" class="move-origin-btn">この住所で更新</button>' +
+      '</div>' +
+      '<div class="subtabs">';
+    MOVE_SUBTABS.forEach(function(t, idx){
+      tabsHtml += '<button type="button" class="subtab' + (idx === 0 ? ' active' : '') + '" data-sub="' + t.key + '">' + t.label + '</button>';
+    });
+    tabsHtml += '</div><div class="move-content"></div>';
+    panel.innerHTML = tabsHtml;
+
+    var originInput = panel.querySelector('.move-origin-input');
+    var contentDiv = panel.querySelector('.move-content');
+    var tabs = panel.querySelectorAll('.subtab');
+    var currentKey = 'bus';
+
+    function ensureOrigin(){
+      if (cache.origin) return Promise.resolve(cache.origin);
+      return geocodeWithFallback(originInput.value.trim()).then(function(o){ cache.origin = o; return o; });
+    }
+
+    function selectSub(key){
+      currentKey = key;
+      tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.sub === key); });
+      if (cache.rendered[key]){
+        contentDiv.innerHTML = '';
+        contentDiv.appendChild(cache.rendered[key]);
+        return;
+      }
+      var holder = document.createElement('div');
+      contentDiv.innerHTML = '';
+      contentDiv.appendChild(holder);
+
+      if (key === 'distance'){
+        renderDistancePanel(holder, r, originInput.value.trim());
+        cache.rendered[key] = holder;
+        return;
+      }
+
+      holder.innerHTML = '<div class="bus-loading"><div class="spinner"></div>住所を特定中…</div>';
+      ensureOrigin().then(function(origin){
+        if (key === 'bus'){
+          holder.innerHTML = '<div class="bus-loading"><div class="spinner"></div>周辺のバス停を検索中…</div>';
+          return fetchNearbyBusStops(origin.lat, origin.lon).then(function(result){
+            renderBusResult(holder, origin, result, originInput.value.trim());
+          });
+        }
+        if (key === 'station'){
+          holder.innerHTML = '<div class="bus-loading"><div class="spinner"></div>最寄り駅を検索中…</div>';
+          return fetchNearbyStations(origin.lat, origin.lon).then(function(result){
+            renderStationResult(holder, origin, result, originInput.value.trim());
+          });
+        }
+        if (key === 'facility'){
+          renderFacilitySubTabs(holder, origin);
+          return;
+        }
+        if (key === 'hazard'){
+          renderHazardResult(holder, origin);
+          return;
+        }
+      }).then(function(){
+        cache.rendered[key] = holder;
+      }).catch(function(err){
+        holder.innerHTML =
+          '<p class="bus-error">住所の特定に失敗しました。</p>' +
+          '<p class="bus-error">詳細: ' + escapeHtml(err && err.message ? err.message : String(err)) + '</p>';
+      });
+    }
+
+    function updateOrigin(){
+      // 住所が変わったので、これまでキャッシュしていた4タブぶんの結果を
+      // すべて破棄し、今開いているタブだけをその場で再検索する
+      cache.origin = null;
+      cache.rendered = {};
+      selectSub(currentKey);
+    }
+
+    panel.querySelector('.move-origin-btn').addEventListener('click', function(e){
+      e.stopPropagation();
+      updateOrigin();
+    });
+    originInput.addEventListener('click', function(e){ e.stopPropagation(); });
+    originInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.stopPropagation(); updateOrigin(); }
+    });
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(e){
+        e.stopPropagation();
+        selectSub(t.dataset.sub);
+      });
+    });
+
+    selectSub('bus');
+  }
+
+  // ---------------------------------------------------------------
+  // 1.96) 🏛 行政・エリア情報（校区・用途地域・地価/路線価を集約）
+  //      いずれも市町コードと町名だけで開けるリンク集のため、
+  //      ジオコーディング不要で即座に表示できる。
+  // ---------------------------------------------------------------
+  function renderAdminPanel(panel, r, city){
+    var addrLabel = r.city + r.town;
+    var cityCore = r.city.replace(/^.*郡/, '');
+
+    var content = {};
+    if (city){
+      var schoolMapUrl = 'https://school.mapexpert.net/pgAreaMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore);
+      var schoolSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 通学区域 小学校 中学校');
+      content.school =
+        '<p class="note">通学区域（校区）は各市町教育委員会が管理しており、同じ町名でも番地によって校区が分かれる場合があります。下記の一次情報で必ずご確認ください。</p>' +
+        '<div class="links">' +
+        '<a href="' + schoolMapUrl + '" target="_blank" rel="noopener">🗺 学区マップで見る</a>' +
+        '<a href="' + schoolSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」の校区を検索</a>' +
+        '</div>';
+
+      var zoneMapUrl = 'https://cityzone.mapexpert.net/ZoneMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore);
+      var zoneSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 用途地域 建ぺい率 容積率');
+      var zoneOfficialLink = city.planUrl
+        ? '<a href="' + city.planUrl + '" target="_blank" rel="noopener">🏛 ' + escapeHtml(r.city) + 'の公式都市計画情報</a>'
+        : '';
+      content.zone =
+        '<p class="note">用途地域・建ぺい率・容積率は各市町の都市計画課が管理しており、同じ町名内でも地区によって数値が異なる場合があります。境界付近は必ず市町の都市計画課へご確認ください。</p>' +
+        '<div class="links">' +
+        '<a href="' + zoneMapUrl + '" target="_blank" rel="noopener">🏙 用途地域マップで見る</a>' +
+        zoneOfficialLink +
+        '<a href="' + zoneSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」の建ぺい率・容積率を検索</a>' +
+        '</div>';
+    } else {
+      content.school = '<p class="note">この市町の校区データには対応していません。</p>';
+      content.zone = '<p class="note">この市町の用途地域データには対応していません。</p>';
+      content.law = '<p class="note">この市町の法規制リンクには対応していません。</p>';
+    }
+
+    if (city){
+      var lawTownMapUrl = 'https://cityzone.mapexpert.net/TownMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore);
+      var lawZoneOfficialLink = city.planUrl
+        ? '<a href="' + city.planUrl + '" target="_blank" rel="noopener">🏛 ' + escapeHtml(r.city) + 'の公式都市計画情報（防火地域等含む）</a>'
+        : '';
+      var lawCityCombinedSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 市街化区域 市街化調整区域 防火地域');
+      var lawFarmSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 農振農用地区域 農地法');
+      var lawForestSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 保安林 森林法');
+      var lawBuriedSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 埋蔵文化財包蔵地');
+      content.law =
+        '<p class="note">法規制は都市計画法・農地法・森林法・文化財保護法など複数の法律にまたがり、それぞれ県・市町・国と管轄が異なります。ここでは各分野の一次情報への入口をまとめています。取引や建築の可否に関わる最終判断は、必ず該当窓口にご確認ください。</p>' +
+
+        '<p style="font-weight:700; color:var(--ink); margin:14px 0 6px;">🏙 都市計画法（市街化区域・調整区域／防火・準防火地域 等）</p>' +
+        '<div class="links">' +
+        '<a href="' + lawTownMapUrl + '" target="_blank" rel="noopener">🗺 市街化区域・調整区域マップ</a>' +
+        lawZoneOfficialLink +
+        '<a href="' + lawCityCombinedSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」を検索</a>' +
+        '</div>' +
+
+        '<p style="font-weight:700; color:var(--ink); margin:14px 0 6px;">🌾 農地法・農業振興地域の整備に関する法律（農振法）</p>' +
+        '<div class="links">' +
+        '<a href="https://map.maff.go.jp/" target="_blank" rel="noopener">🗺 eMAFF農地ナビ（農林水産省）</a>' +
+        '<a href="' + lawFarmSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」を検索</a>' +
+        '</div>' +
+
+        '<p style="font-weight:700; color:var(--ink); margin:14px 0 6px;">🌲 森林法（保安林 等）</p>' +
+        '<div class="links">' +
+        '<a href="' + lawForestSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」を検索</a>' +
+        '</div>' +
+
+        '<p style="font-weight:700; color:var(--ink); margin:14px 0 6px;">🏺 文化財保護法（埋蔵文化財包蔵地）</p>' +
+        '<div class="links">' +
+        '<a href="https://bunkazai.pref.fukui.lg.jp/buried_map" target="_blank" rel="noopener">🗺 福井県埋蔵文化財遺跡地図</a>' +
+        '<a href="' + lawBuriedSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」を検索</a>' +
+        '</div>';
+    }
+
+    var landPriceUrl = 'https://www.land.mlit.go.jp/landPrice/AriaServlet?MOD=2&TYP=0';
+    var reinfoLibUrl = 'https://www.reinfolib.mlit.go.jp/map/';
+    var rosenkaUrl = 'https://www.rosenka.nta.go.jp/main_r08/kanazawa/fukui/prices/city_frm.htm';
+    var landSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 地価公示 取引価格');
+    var rosenkaSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(addrLabel + ' 路線価');
+    content.price =
+      '<p class="note">地価公示・取引価格・路線価は、いずれも住所をピンポイントで直接開けるリンク形式が公開されていないため、市区町村選択画面などの入口へのリンクです。同じ町内でも地点によって金額が異なるため、下記から実際の地番・地区を選んで確認してください。</p>' +
+      '<div class="links">' +
+      '<a href="' + landPriceUrl + '" target="_blank" rel="noopener">🏛 地価公示・都道府県地価調査（国交省）</a>' +
+      '<a href="' + reinfoLibUrl + '" target="_blank" rel="noopener">🗺 不動産情報ライブラリで地図から探す</a>' +
+      '<a href="' + rosenkaUrl + '" target="_blank" rel="noopener">📄 路線価図（国税庁・福井県）</a>' +
+      '<a href="' + landSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」の地価公示・取引価格を検索</a>' +
+      '<a href="' + rosenkaSearchUrl + '" target="_blank" rel="noopener">🔎「' + escapeHtml(addrLabel) + '」の路線価を検索</a>' +
+      '</div>';
+
+    var subTabs = [
+      { key:'school', label:'🏫 校区' },
+      { key:'zone',   label:'🏙 用途地域' },
+      { key:'law',    label:'⚖️ 法規制' },
+      { key:'price',  label:'💰 地価・路線価' }
+    ];
+    var tabsHtml = '<div class="subtabs">';
+    subTabs.forEach(function(t, idx){
+      tabsHtml += '<button type="button" class="subtab' + (idx === 0 ? ' active' : '') + '" data-sub="' + t.key + '">' + t.label + '</button>';
+    });
+    tabsHtml += '</div><div class="admin-content"></div>';
+    panel.innerHTML = tabsHtml;
+
+    var contentDiv = panel.querySelector('.admin-content');
+    var tabs = panel.querySelectorAll('.subtab');
+    function selectSub(key){
+      tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.sub === key); });
+      contentDiv.innerHTML = content[key] || '<p class="note">情報がありません。</p>';
+    }
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(e){
+        e.stopPropagation();
+        selectSub(t.dataset.sub);
+      });
+    });
+    selectSub('school');
+  }
+
+  // ---------------------------------------------------------------
+  // 1.85) 物件概要シート自動生成
+  //      郵便番号・住所・最寄りバス停・最寄り駅・校区・用途地域・
+  //      ハザードマップの情報を1つのテキストにまとめてコピー／印刷できる。
+  //      既存のバス停・駅検索の仕組みをそのまま呼び出して合成する。
+  // ---------------------------------------------------------------
+  function buildSummaryText(r, origin, busTop, stationTop){
+    var zipFormatted = r.zip.slice(0,3) + '-' + r.zip.slice(3);
+    var city = findCity(r.city);
+    var lines = [];
+    lines.push('【物件概要シート】（' + new Date().toLocaleDateString('ja-JP') + ' 作成）');
+    lines.push('');
+    lines.push('郵便番号: ' + zipFormatted);
+    lines.push('住所: 福井県' + r.city + r.town + (r.ext ? ' ' + r.ext : ''));
+    lines.push('');
+    lines.push('最寄りバス停: ' + (busTop
+      ? busTop.name + '（徒歩約' + walkMinutes(busTop.dist) + '分・直線約' + Math.round(busTop.dist) + 'm）'
+      : '自動検索できず（Google Mapsでご確認ください）'));
+    lines.push('最寄り駅: ' + (stationTop
+      ? stationTop.name + (stationTop.line ? '（' + stationTop.line + '）' : '') + '（徒歩約' + walkMinutes(stationTop.dist) + '分・直線約' + Math.round(stationTop.dist) + 'm）'
+      : '自動検索できず（Google Mapsでご確認ください）'));
+    lines.push('');
+    if (city){
+      var cityCore = r.city.replace(/^.*郡/, '');
+      lines.push('通学区域（校区）マップ: https://school.mapexpert.net/pgAreaMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore));
+      lines.push('用途地域マップ: https://cityzone.mapexpert.net/ZoneMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore));
+    }
+    lines.push('ハザードマップ: https://disaportal.gsi.go.jp/maps/?ll=' + origin.lat + ',' + origin.lon + '&z=17&base=pale&vs=c1j0l0u0t0h0z0');
+    lines.push('地価公示・取引価格: https://www.reinfolib.mlit.go.jp/map/');
+    lines.push('路線価図（国税庁・福井県）: https://www.rosenka.nta.go.jp/main_r08/kanazawa/fukui/prices/city_frm.htm');
+    lines.push('');
+    lines.push('※最寄りバス停・駅の時間は直線距離からの概算です。校区・用途地域・ハザード情報はリンク先（一次情報）で必ずご確認ください。');
+    return lines.join('\n');
+  }
+
+  function printSummarySheet(r, origin, busTop, stationTop){
+    var printArea = document.getElementById('printArea');
+    var zipFormatted = r.zip.slice(0,3) + '-' + r.zip.slice(3);
+    var dateStr = new Date().toLocaleDateString('ja-JP');
+    var city = findCity(r.city);
+    function row(label, valueHtml){
+      return '<tr><td style="padding:8px 14px; border-bottom:1px solid #ccc; font-weight:bold; white-space:nowrap; width:150px; vertical-align:top;">' + label + '</td><td style="padding:8px 14px; border-bottom:1px solid #ccc;">' + valueHtml + '</td></tr>';
+    }
+    var rows = '';
+    rows += row('郵便番号', zipFormatted);
+    rows += row('住所', escapeHtml('福井県' + r.city + r.town + (r.ext ? ' ' + r.ext : '')));
+    rows += row('最寄りバス停', busTop ? escapeHtml(busTop.name) + '（徒歩約' + walkMinutes(busTop.dist) + '分）' : '要確認');
+    rows += row('最寄り駅', stationTop ? escapeHtml(stationTop.name) + (stationTop.line ? '（' + escapeHtml(stationTop.line) + '）' : '') + '（徒歩約' + walkMinutes(stationTop.dist) + '分）' : '要確認');
+    if (city){
+      var cityCore = r.city.replace(/^.*郡/, '');
+      rows += row('通学区域（校区）', '<a href="https://school.mapexpert.net/pgAreaMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore) + '">学区マップを見る</a>');
+      rows += row('用途地域', '<a href="https://cityzone.mapexpert.net/ZoneMap?L=' + city.code + '&N=' + encodeURIComponent(cityCore) + '">用途地域マップを見る</a>');
+    }
+    rows += row('ハザードマップ', '<a href="https://disaportal.gsi.go.jp/maps/?ll=' + origin.lat + ',' + origin.lon + '&z=17&base=pale&vs=c1j0l0u0t0h0z0">重ねるハザードマップを見る</a>');
+    rows += row('地価公示・取引価格', '<a href="https://www.reinfolib.mlit.go.jp/map/">不動産情報ライブラリで見る</a>');
+    rows += row('路線価図', '<a href="https://www.rosenka.nta.go.jp/main_r08/kanazawa/fukui/prices/city_frm.htm">国税庁 路線価図（福井県）</a>');
+
+    printArea.innerHTML =
+      '<h2 style="font-family:sans-serif;">物件概要シート（' + dateStr + '作成）</h2>' +
+      '<table style="border-collapse:collapse; width:100%; font-family:sans-serif; font-size:14px;">' + rows + '</table>' +
+      '<p style="font-family:sans-serif; font-size:11px; color:#666; margin-top:14px;">※最寄りバス停・駅の時間は直線距離からの概算です。校区・用途地域・ハザード情報はリンク先（一次情報）で必ずご確認ください。</p>';
+    window.print();
+  }
+
+  function renderSummaryResult(panel, r, origin, busTop, stationTop){
+    var text = buildSummaryText(r, origin, busTop, stationTop);
+    panel.innerHTML =
+      '<div class="summary-box"></div>' +
+      '<div class="summary-actions">' +
+      '<button type="button" class="summary-copy-btn">📋 テキストをコピー</button>' +
+      '<button type="button" class="summary-print-btn">🖨 シートを印刷</button>' +
+      '</div>';
+    panel.querySelector('.summary-box').textContent = text;
+    panel.querySelector('.summary-copy-btn').addEventListener('click', function(e){
+      e.stopPropagation();
+      copyToClipboard(text);
+      var btn = e.currentTarget;
+      var original = btn.textContent;
+      btn.textContent = '✓ コピーしました';
+      setTimeout(function(){ btn.textContent = original; }, 1300);
+    });
+    panel.querySelector('.summary-print-btn').addEventListener('click', function(e){
+      e.stopPropagation();
+      printSummarySheet(r, origin, busTop, stationTop);
+    });
+  }
+
+  function renderSummaryPanel(panel, r, rawQuery){
+    panel.innerHTML = '<div class="bus-loading"><div class="spinner"></div>バス停・駅などの情報を集めてシートを作成中…</div>';
+    var geoAddr = buildGeoAddress(r, rawQuery);
+    geocodeWithFallback(geoAddr).then(function(origin){
+      return Promise.all([
+        fetchNearbyBusStops(origin.lat, origin.lon),
+        fetchNearbyStations(origin.lat, origin.lon)
+      ]).then(function(pair){
+        var busResult = pair[0];
+        var stationResult = pair[1];
+        var busTop = (!busResult.unavailable && busResult.stops.length > 0) ? busResult.stops[0] : null;
+        var stationTop = (!stationResult.unavailable && stationResult.stations.length > 0) ? stationResult.stations[0] : null;
+        renderSummaryResult(panel, r, origin, busTop, stationTop);
+      });
+    }).catch(function(err){
+      panel.innerHTML =
+        '<p class="bus-error">住所（' + escapeHtml(geoAddr) + '）の特定に失敗しました。</p>' +
+        '<p class="bus-error">詳細: ' + escapeHtml(err && err.message ? err.message : String(err)) + '</p>';
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // 1.9) 2地点間の距離・移動時間計算
+  //      比較先は「住所」だけでなく「施設名」でも検索できるようにする。
+  //      国土地理院のAPIは住所（丁目・番地）専用で施設名には対応していないため、
+  //      施設名にも対応する OpenStreetMap Nominatim（無料・登録不要）をまず試し、
+  //      見つからなければ住所として国土地理院APIにフォールバックする。
+  // ---------------------------------------------------------------
+  function resolveByName(text){
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=ja&countrycodes=jp&q=' + encodeURIComponent(text);
+    return fetch(url).then(function(res){
+      if (!res.ok) throw new Error('施設名検索APIがエラーを返しました（HTTP ' + res.status + '）');
+      return res.json();
+    }, function(networkErr){
+      throw new Error('施設名検索サーバー（Nominatim）に接続できませんでした（' + (networkErr && networkErr.message ? networkErr.message : '通信エラー') + '）');
+    }).then(function(data){
+      if (!data || data.length === 0) throw new Error('該当する施設・場所が見つかりませんでした');
+      var item = data[0];
+      return { lat: parseFloat(item.lat), lon: parseFloat(item.lon), title: item.display_name || text };
+    });
+  }
+
+  // 施設名検索→ダメなら住所検索（国土地理院・番地フォールバック付き）の順に試す
+  function resolveTargetLocation(text){
+    return resolveByName(text).catch(function(nameErr){
+      return geocodeWithFallback(text).catch(function(addrErr){
+        // 両方失敗した場合は、施設名検索のエラーを優先して表示する
+        throw nameErr;
+      });
+    });
+  }
+
+  function renderDistancePanel(panel, r, rawQuery){
+    var originDefault = buildGeoAddress(r, rawQuery);
+    panel.innerHTML =
+      '<p class="note" style="margin:0 0 10px;">起点にはこの物件の住所が自動で入力されています（書き換え可能）。比較先には住所または施設名（勤務先・実家・駅名・店名など、県外でも可）を入力してください。</p>' +
+      '<div class="distance-form">' +
+        '<input type="text" class="distance-origin-input" value="' + escapeHtml(originDefault) + '" placeholder="起点の住所">' +
+      '</div>' +
+      '<div class="distance-form">' +
+        '<input type="text" class="distance-target-input" placeholder="比較先：住所または施設名（例：福井駅、イオン鯖江店 等）">' +
+        '<button type="button" class="distance-calc-btn">計算する</button>' +
+      '</div>' +
+      '<div class="distance-result-area"></div>';
+
+    var originInput = panel.querySelector('.distance-origin-input');
+    var input = panel.querySelector('.distance-target-input');
+    var resultArea = panel.querySelector('.distance-result-area');
+
+    function runCalc(){
+      var originRaw = originInput.value.trim();
+      var targetRaw = input.value.trim();
+      if (!originRaw){
+        resultArea.innerHTML = '<p class="bus-error">起点の住所を入力してください。</p>';
+        return;
+      }
+      if (!targetRaw){
+        resultArea.innerHTML = '<p class="bus-error">比較先の住所または施設名を入力してください。</p>';
+        return;
+      }
+      resultArea.innerHTML = '<div class="bus-loading"><div class="spinner"></div>2地点の位置を特定中…</div>';
+      Promise.all([
+        resolveTargetLocation(originRaw),
+        resolveTargetLocation(targetRaw)
+      ]).then(function(pair){
+        var origin = pair[0];
+        var target = pair[1];
+        var dist = haversineMeters(origin.lat, origin.lon, target.lat, target.lon);
+        var walkUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + origin.lat + ',' + origin.lon + '&destination=' + target.lat + ',' + target.lon + '&travelmode=walking';
+        var driveUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + origin.lat + ',' + origin.lon + '&destination=' + target.lat + ',' + target.lon + '&travelmode=driving';
+        var transitUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + origin.lat + ',' + origin.lon + '&destination=' + target.lat + ',' + target.lon + '&travelmode=transit';
+        var distKm = (dist / 1000).toFixed(1);
+        resultArea.innerHTML =
+          '<div class="distance-result">' +
+            '<p style="margin:0 0 6px; font-weight:700; color:var(--ink);">📍 ' + escapeHtml(origin.title) + ' ⇔ 📍 ' + escapeHtml(target.title) + '</p>' +
+            '<p style="margin:0 0 10px;">直線距離: 約' + distKm + 'km（徒歩概算 約' + walkMinutes(dist) + '分）</p>' +
+            '<p style="margin:0 0 6px; font-size:11.5px; color:var(--ink-soft);">実際の道なり距離・正確な所要時間は下記のGoogle Mapsでご確認ください。</p>' +
+            '<div class="links">' +
+              '<a href="' + walkUrl + '" target="_blank" rel="noopener">🚶 徒歩ルート</a>' +
+              '<a href="' + driveUrl + '" target="_blank" rel="noopener">🚗 車ルート</a>' +
+              '<a href="' + transitUrl + '" target="_blank" rel="noopener">🚃 公共交通ルート</a>' +
+            '</div>' +
+          '</div>';
+      }).catch(function(err){
+        resultArea.innerHTML =
+          '<p class="bus-error">場所の特定に失敗しました。</p>' +
+          '<p class="bus-error">詳細: ' + escapeHtml(err && err.message ? err.message : String(err)) + '</p>';
+      });
+    }
+
+    panel.querySelector('.distance-calc-btn').addEventListener('click', function(e){
+      e.stopPropagation();
+      runCalc();
+    });
+    originInput.addEventListener('click', function(e){ e.stopPropagation(); });
+    originInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.stopPropagation(); runCalc(); }
+    });
+    input.addEventListener('click', function(e){ e.stopPropagation(); });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.stopPropagation(); runCalc(); }
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // 2) 検索・絞り込みロジック
+  // ---------------------------------------------------------------
+  var resultsEl = document.getElementById('results');
+  var resultMeta = document.getElementById('resultMeta');
+
+  function normalize(str){
+    return (str || '')
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(ch){ return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); })
+      .replace(/[\s\u3000\-‐−、。，．・「」『』（）()!！?？~〜]/g, '')
+      .toLowerCase();
+  }
+
+  // 郵便番号データでは「◯◯町１丁目」のように丁目付きで登録されている町と、
+  // 全丁目が同一郵便番号のため「◯◯町」とだけ登録されている町が混在する。
+  // このため丁目・番地・号を取り除いた「町の核」同士で緩く比較することで、
+  // 「住吉町1丁目」のように具体的に打っても、丁目表記のない「住吉町」がヒットするようにする。
+  function coreForm(str){
+    var s = normalize(str);
+    // 数字＋丁目／番地／号／番 の組み合わせを除去（大字側・入力側どちらにも対応）
+    s = s.replace(/[0-9]+(丁目|番地|号|番)/g, '');
+    // 末尾に残った番地・枝番らしき数字列（例："12-21" の残骸）を除去
+    s = s.replace(/[0-9\-]+$/, '');
+    return s;
+  }
+
+  var lastOldNameResolved = null;
+
+  function search(query){
+    var raw = query.trim();
+    // 先頭の「福井県」はデータ側（市区町村名以下）に含まれないため、
+    // 照合前に取り除く（全角スペース等を挟んで書かれた場合にも対応）
+    raw = raw.replace(/^福井県[\s\u3000]*/, '');
+    if (!raw) { lastOldNameResolved = null; return allRecords.slice(0, 60); }
+
+    // 旧市町村名（例：武生市・今立町・三国町など）が先頭にあれば現在の市町名に変換
+    lastOldNameResolved = null;
+    var resolved = resolveOldName(raw);
+    if (resolved){
+      lastOldNameResolved = resolved;
+      raw = resolved.text;
+    }
+
+    var digits = raw.replace(/[^0-9０-９]/g, '');
+    digits = digits.replace(/[０-９]/g, function(ch){ return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); });
+    var strippedRaw = raw.replace(/[\s\u3000\-‐−、。，．・「」『』（）()!！?？~〜]/g,'');
+
+    var results;
+    if (digits.length >= 2 && digits.length === strippedRaw.length){
+      // 入力がほぼ数字 → 郵便番号の前方一致
+      results = allRecords.filter(function(r){ return r.zip.indexOf(digits) === 0; });
+    } else {
+      // 1) まずは丁目・番地込みの厳密一致を試す（より的確な候補を優先）
+      var nqExact = normalize(raw);
+      var exact = allRecords.filter(function(r){
+        var haystack = normalize(r.city + r.town + r.ext);
+        return haystack.indexOf(nqExact) !== -1;
+      });
+
+      // 2) 厳密一致が0件、または入力に丁目・番地が含まれる場合は
+      //    丁目/番地を吸収した「町の核」同士でも突き合わせる
+      var nqCore = coreForm(raw);
+      var loose = [];
+      if (nqCore){
+        loose = allRecords.filter(function(r){
+          var core = coreForm(r.city + r.town + r.ext);
+          return core.indexOf(nqCore) !== -1;
+        });
+      }
+
+      // 厳密一致と緩め一致をマージ（重複除去、厳密一致を優先表示）
+      var seenZip = {};
+      results = [];
+      exact.concat(loose).forEach(function(r){
+        var key = r.zip + '|' + r.town + '|' + r.ext;
+        if (seenZip[key]) return;
+        seenZip[key] = true;
+        results.push(r);
+      });
+    }
+    return results.slice(0, 80);
+  }
+
+  function render(list, query){
+    resultsEl.innerHTML = '';
+    var oldNameNote = lastOldNameResolved
+      ? '<div class="oldname-note">🏯「' + escapeHtml(lastOldNameResolved.old) + '」は現在の「' + escapeHtml(lastOldNameResolved.newCity) + '」です。「' + escapeHtml(lastOldNameResolved.newCity) + '」で検索しています。</div>'
+      : '';
+    if (list.length === 0){
+      resultMeta.innerHTML = oldNameNote;
+      resultsEl.innerHTML = '<div class="empty-state"><div class="stamp-mini">📍</div>該当する住所・郵便番号が見つかりません</div>';
+      return;
+    }
+    resultMeta.innerHTML = oldNameNote + (query
+      ? list.length + ' 件ヒット（最大80件まで表示）'
+      : '候補（先頭 ' + list.length + ' 件）— 住所からも郵便番号からも検索できます');
+
+    var frag = document.createDocumentFragment();
+    list.forEach(function(r){
+      var li = document.createElement('li');
+      var zipFormatted = r.zip.slice(0,3) + '-' + r.zip.slice(3);
+      var city = findCity(r.city);
+
+      var row = document.createElement('div');
+      row.className = 'result-row';
+      row.innerHTML =
+        '<div class="row-main">' +
+          '<input type="checkbox" class="row-check" title="選択">' +
+          '<button type="button" class="star-btn" title="お気に入り">☆</button>' +
+          '<span class="zip">' + zipFormatted + '</span>' +
+          '<span class="addr"><span class="city">' + escapeHtml(r.city) + '</span>' + escapeHtml(r.town) + (r.ext ? ' ' + escapeHtml(r.ext) : '') + '</span>' +
+          '<span class="copy-flag">コピーしました</span>' +
+        '</div>' +
+        '<div class="row-actions">' +
+          '<button type="button" class="summary-btn">📋 物件概要シート</button>' +
+          '<button type="button" class="move-btn">🗺 周辺・移動情報</button>' +
+          '<button type="button" class="admin-btn">🏛 行政・エリア情報</button>' +
+        '</div>';
+      li.appendChild(row);
+
+      var checkEl = row.querySelector('.row-check');
+      var starEl = row.querySelector('.star-btn');
+      var recordKey = recKey(r);
+      if (isFavorite(r)){ starEl.textContent = '★'; starEl.classList.add('active'); }
+      if (selectedKeys.has(recordKey)){ checkEl.checked = true; }
+
+      var movePanel = document.createElement('div');
+      movePanel.className = 'move-panel';
+      li.appendChild(movePanel);
+      var moveLoaded = false;
+
+      var adminPanel = document.createElement('div');
+      adminPanel.className = 'admin-panel';
+      li.appendChild(adminPanel);
+      var adminLoaded = false;
+
+      var summaryPanel = document.createElement('div');
+      summaryPanel.className = 'summary-panel';
+      li.appendChild(summaryPanel);
+      var summaryLoaded = false;
+
+      row.addEventListener('click', function(e){
+        if (e.target.classList && e.target.classList.contains('row-check')){
+          if (e.target.checked){
+            selectedKeys.set(recordKey, r);
+          } else {
+            selectedKeys.delete(recordKey);
+          }
+          updateSelectionToolbar();
+          return;
+        }
+        if (e.target.closest && e.target.closest('.star-btn')){
+          var nowFav = toggleFavorite(r);
+          starEl.textContent = nowFav ? '★' : '☆';
+          starEl.classList.toggle('active', nowFav);
+          return;
+        }
+        saveHistoryEntry(qInput.value);
+        if (e.target.closest && e.target.closest('.summary-btn')){
+          summaryPanel.classList.toggle('open');
+          if (summaryPanel.classList.contains('open') && !summaryLoaded){
+            summaryLoaded = true;
+            renderSummaryPanel(summaryPanel, r, qInput.value);
+          }
+          return;
+        }
+        if (e.target.closest && e.target.closest('.move-btn')){
+          movePanel.classList.toggle('open');
+          if (movePanel.classList.contains('open') && !moveLoaded){
+            moveLoaded = true;
+            renderMovePanel(movePanel, r, qInput.value);
+          }
+          return;
+        }
+        if (e.target.closest && e.target.closest('.admin-btn')){
+          adminPanel.classList.toggle('open');
+          if (adminPanel.classList.contains('open') && !adminLoaded){
+            adminLoaded = true;
+            renderAdminPanel(adminPanel, r, city);
+          }
+          return;
+        }
+        var text = zipFormatted + ' ' + r.city + r.town + (r.ext || '');
+        copyToClipboard(text);
+        li.classList.add('copied');
+        setTimeout(function(){ li.classList.remove('copied'); }, 1100);
+      });
+      frag.appendChild(li);
+    });
+    resultsEl.appendChild(frag);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function copyToClipboard(text){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  // ---------------------------------------------------------------
+  // 3.5) 検索結果をURLで共有（?q=... をアドレスバーに反映／読み込み時に復元）
+  //      ブックマークやタブの再読み込みでも検索状態が復元される。
+  //      file:// で開いている場合は自分の端末内でのみ有効（他人と共有する
+  //      には、どこか一つのURL（社内サイト等）にアップロードする必要がある）。
+  // ---------------------------------------------------------------
+  function syncUrlWithQuery(text){
+    try {
+      var url = new URL(window.location.href);
+      if (text && text.trim()){
+        url.searchParams.set('q', text);
+      } else {
+        url.searchParams.delete('q');
+      }
+      window.history.replaceState(null, '', url.toString());
+    } catch(e){ /* file://等で失敗しても検索自体には影響させない */ }
+  }
+
+  function getInitialQueryFromUrl(){
+    try {
+      var params = new URLSearchParams(window.location.search);
+      return params.get('q') || '';
+    } catch(e){ return ''; }
+  }
+
+  var debounceTimer = null;
+  qInput.addEventListener('input', function(){
+    clearTimeout(debounceTimer);
+    var val = qInput.value;
+    debounceTimer = setTimeout(function(){
+      render(search(val), val.trim());
+      syncUrlWithQuery(val);
+    }, 80);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    qInput.value = '';
+    document.getElementById('voiceTranscript').textContent = '';
+    render(allRecords.slice(0,60), '');
+    syncUrlWithQuery('');
+    qInput.focus();
+  });
+
+  document.getElementById('shareUrlBtn').addEventListener('click', function(){
+    syncUrlWithQuery(qInput.value);
+    copyToClipboard(window.location.href);
+    var btn = document.getElementById('shareUrlBtn');
+    var original = btn.textContent;
+    btn.textContent = '✓ URLをコピーしました';
+    setTimeout(function(){ btn.textContent = original; }, 1500);
+  });
+
+  // ---------------------------------------------------------------
+  // 3) 音声入力（Web Speech API / Chrome系ブラウザ対応）
+  // ---------------------------------------------------------------
+  var recognition = null;
+  var listening = false;
+  var voiceTranscript = document.getElementById('voiceTranscript');
+
+  function setupSpeech(){
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition){
+      micBtn.classList.add('unsupported');
+      micBtn.title = 'このブラウザは音声入力に対応していません（Chrome推奨）';
+      return;
+    }
+    micBtn.disabled = false;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ja-JP';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function(event){
+      var finalText = '';
+      var interimText = '';
+      for (var i = event.resultIndex; i < event.results.length; i++){
+        var transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal){
+          finalText += transcript;
+        } else {
+          interimText += transcript;
+        }
+      }
+      var combined = (qInput.dataset.voiceBase || '') + finalText;
+      if (finalText){
+        qInput.dataset.voiceBase = combined;
+      }
+      var displayValue = combined + interimText;
+      qInput.value = displayValue;
+      voiceTranscript.textContent = interimText ? '認識中… 「' + interimText + '」' : '';
+      render(search(displayValue), displayValue.trim());
+    };
+
+    recognition.onerror = function(event){
+      voiceTranscript.textContent = '音声認識エラー: ' + event.error;
+      stopListening();
+    };
+    recognition.onend = function(){
+      if (listening){
+        // continuous指定でも環境により自動停止することがあるため再開
+        try { recognition.start(); } catch(e){ stopListening(); }
+      }
+    };
+  }
+
+  function startListening(){
+    if (!recognition) return;
+    qInput.dataset.voiceBase = qInput.value ? qInput.value : '';
+    listening = true;
+    micBtn.classList.add('listening');
+    voiceTranscript.textContent = '聞き取り中…';
+    try { recognition.start(); } catch(e){}
+  }
+  function stopListening(){
+    listening = false;
+    micBtn.classList.remove('listening');
+    if (recognition){ try { recognition.stop(); } catch(e){} }
+    voiceTranscript.textContent = '';
+  }
+
+  micBtn.addEventListener('click', function(){
+    if (micBtn.disabled || micBtn.classList.contains('unsupported')) return;
+    if (listening) stopListening(); else startListening();
+  });
+
+  // ---------------------------------------------------------------
+  // 4) 検索履歴・お気に入り（ブラウザ内 localStorage に保存、次回起動時も保持）
+  // ---------------------------------------------------------------
+  var LS_HISTORY_KEY = 'kurashi_hayamicho_history_v1';
+  var LS_FAV_KEY = 'kurashi_hayamicho_favorites_v1';
+
+  function lsGet(key){
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  }
+  function lsSet(key, val){
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){ /* プライベートモード等で保存できない場合は無視 */ }
+  }
+
+  function recKey(r){ return r.zip + '|' + r.town + '|' + r.ext; }
+
+  function getHistory(){ return lsGet(LS_HISTORY_KEY); }
+  function saveHistoryEntry(query){
+    query = (query || '').trim();
+    if (!query) return;
+    var hist = getHistory().filter(function(q){ return q !== query; });
+    hist.unshift(query);
+    if (hist.length > 20) hist = hist.slice(0, 20);
+    lsSet(LS_HISTORY_KEY, hist);
+    renderHistoryChips();
+  }
+  function removeHistoryEntry(query){
+    lsSet(LS_HISTORY_KEY, getHistory().filter(function(q){ return q !== query; }));
+    renderHistoryChips();
+  }
+  function clearHistory(){
+    lsSet(LS_HISTORY_KEY, []);
+    renderHistoryChips();
+  }
+
+  function getFavorites(){ return lsGet(LS_FAV_KEY); }
+  function isFavorite(r){
+    var key = recKey(r);
+    return getFavorites().some(function(f){ return f.key === key; });
+  }
+  function toggleFavorite(r){
+    var key = recKey(r);
+    var favs = getFavorites();
+    var idx = -1;
+    favs.forEach(function(f, i){ if (f.key === key) idx = i; });
+    if (idx >= 0){
+      favs.splice(idx, 1);
+    } else {
+      favs.unshift({ key: key, zip: r.zip, city: r.city, town: r.town, ext: r.ext });
+      if (favs.length > 50) favs = favs.slice(0, 50);
+    }
+    lsSet(LS_FAV_KEY, favs);
+    renderFavoritesChips();
+    return idx < 0; // true = 追加された／false = 削除された
+  }
+  function removeFavorite(key){
+    lsSet(LS_FAV_KEY, getFavorites().filter(function(f){ return f.key !== key; }));
+    renderFavoritesChips();
+  }
+  function clearFavorites(){
+    lsSet(LS_FAV_KEY, []);
+    renderFavoritesChips();
+  }
+
+  var historyContent = document.getElementById('historyContent');
+  var favoritesContent = document.getElementById('favoritesContent');
+
+  function renderHistoryChips(){
+    var hist = getHistory();
+    if (hist.length === 0){
+      historyContent.innerHTML = '<span class="side-empty">まだ検索履歴がありません</span>';
+      return;
+    }
+    var html = '';
+    hist.forEach(function(q){
+      html += '<span class="chip" data-query="' + escapeHtml(q) + '"><span class="chip-label">' + escapeHtml(q) + '</span><span class="chip-x" data-remove="' + escapeHtml(q) + '">×</span></span>';
+    });
+    html += '<button type="button" class="side-clear" id="clearHistoryBtn">履歴を全消去</button>';
+    historyContent.innerHTML = html;
+  }
+
+  function renderFavoritesChips(){
+    var favs = getFavorites();
+    if (favs.length === 0){
+      favoritesContent.innerHTML = '<span class="side-empty">まだお気に入りがありません（結果の☆を押すと追加されます）</span>';
+      return;
+    }
+    var html = '';
+    favs.forEach(function(f){
+      var label = f.city + f.town + (f.ext ? ' ' + f.ext : '');
+      html += '<span class="chip" data-fav-query="' + escapeHtml(f.city + f.town) + '"><span class="chip-label">★ ' + escapeHtml(label) + '</span><span class="chip-x" data-remove-fav="' + escapeHtml(f.key) + '">×</span></span>';
+    });
+    html += '<button type="button" class="side-clear" id="clearFavoritesBtn">すべて削除</button>';
+    favoritesContent.innerHTML = html;
+  }
+
+  historyContent.addEventListener('click', function(e){
+    var xBtn = e.target.closest('.chip-x');
+    if (xBtn && xBtn.dataset.remove !== undefined){
+      e.stopPropagation();
+      removeHistoryEntry(xBtn.dataset.remove);
+      return;
+    }
+    if (e.target.id === 'clearHistoryBtn'){ clearHistory(); return; }
+    var chip = e.target.closest('.chip');
+    if (chip && chip.dataset.query !== undefined){
+      qInput.value = chip.dataset.query;
+      render(search(chip.dataset.query), chip.dataset.query.trim());
+      syncUrlWithQuery(chip.dataset.query);
+      qInput.focus();
+    }
+  });
+
+  favoritesContent.addEventListener('click', function(e){
+    var xBtn = e.target.closest('.chip-x');
+    if (xBtn && xBtn.dataset.removeFav !== undefined){
+      e.stopPropagation();
+      removeFavorite(xBtn.dataset.removeFav);
+      return;
+    }
+    if (e.target.id === 'clearFavoritesBtn'){ clearFavorites(); return; }
+    var chip = e.target.closest('.chip');
+    if (chip && chip.dataset.favQuery !== undefined){
+      qInput.value = chip.dataset.favQuery;
+      render(search(chip.dataset.favQuery), chip.dataset.favQuery.trim());
+      syncUrlWithQuery(chip.dataset.favQuery);
+      qInput.focus();
+    }
+  });
+
+  var oldnamesContent = document.getElementById('oldnamesContent');
+
+  var sideTabs = document.querySelectorAll('.side-tab');
+  sideTabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      sideTabs.forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = tab.dataset.tab;
+      historyContent.style.display = (target === 'history') ? 'flex' : 'none';
+      favoritesContent.style.display = (target === 'favorites') ? 'flex' : 'none';
+      oldnamesContent.style.display = (target === 'oldnames') ? 'block' : 'none';
+    });
+  });
+
+  function renderOldNamesTable(){
+    var byNew = {};
+    OLD_NAME_MAP.forEach(function(e){
+      if (!byNew[e.new]) byNew[e.new] = [];
+      byNew[e.new].push(e);
+    });
+    var html = '<p class="note" style="margin:0 0 10px;">平成の大合併（2004〜2006年）で消滅した旧市町村名です。クリックすると検索欄に入力されます（坂井市の旧4町は現在も住所に町名が残るため、そのまま検索しても見つかります）。</p>';
+    html += '<table class="oldname-table"><tbody>';
+    Object.keys(byNew).forEach(function(newCity){
+      var olds = byNew[newCity].map(function(e){
+        return '<span class="oldname-chip" data-old="' + escapeHtml(e.old) + '">' + escapeHtml(e.old) + '</span>';
+      }).join('');
+      var date = byNew[newCity][0].date;
+      html += '<tr><td class="oldname-new">' + escapeHtml(newCity) + '</td><td>' + olds + '</td><td class="oldname-date">' + escapeHtml(date) + '〜</td></tr>';
+    });
+    html += '</tbody></table>';
+    oldnamesContent.innerHTML = html;
+  }
+  renderOldNamesTable();
+
+  oldnamesContent.addEventListener('click', function(e){
+    var chip = e.target.closest('.oldname-chip');
+    if (chip && chip.dataset.old){
+      qInput.value = chip.dataset.old;
+      render(search(chip.dataset.old), chip.dataset.old.trim());
+      syncUrlWithQuery(chip.dataset.old);
+      qInput.focus();
+    }
+  });
+
+  // ---------------------------------------------------------------
+  // 5) 複数選択 → まとめてコピー／印刷用に表示
+  // ---------------------------------------------------------------
+  var selectedKeys = new Map(); // recordKey -> record
+  var selectionToolbar = document.getElementById('selectionToolbar');
+  var selectionCount = document.getElementById('selectionCount');
+
+  function updateSelectionToolbar(){
+    var n = selectedKeys.size;
+    if (n > 0){
+      selectionToolbar.classList.add('show');
+      selectionCount.textContent = n + '件選択中';
+    } else {
+      selectionToolbar.classList.remove('show');
+    }
+  }
+
+  document.getElementById('clearSelectionBtn').addEventListener('click', function(){
+    selectedKeys.clear();
+    updateSelectionToolbar();
+    document.querySelectorAll('.row-check').forEach(function(cb){ cb.checked = false; });
+  });
+
+  document.getElementById('copySelectedBtn').addEventListener('click', function(){
+    if (selectedKeys.size === 0) return;
+    var lines = [];
+    selectedKeys.forEach(function(r){
+      var zipFormatted = r.zip.slice(0,3) + '-' + r.zip.slice(3);
+      lines.push(zipFormatted + ' ' + r.city + r.town + (r.ext || ''));
+    });
+    copyToClipboard(lines.join('\n'));
+    var btn = document.getElementById('copySelectedBtn');
+    var original = btn.textContent;
+    btn.textContent = '✓ コピーしました';
+    setTimeout(function(){ btn.textContent = original; }, 1300);
+  });
+
+  document.getElementById('printSelectedBtn').addEventListener('click', function(){
+    if (selectedKeys.size === 0) return;
+    var printArea = document.getElementById('printArea');
+    var rows = [];
+    selectedKeys.forEach(function(r){
+      var zipFormatted = r.zip.slice(0,3) + '-' + r.zip.slice(3);
+      rows.push(
+        '<tr>' +
+          '<td style="padding:6px 12px; border-bottom:1px solid #ccc; font-family:monospace;">' + zipFormatted + '</td>' +
+          '<td style="padding:6px 12px; border-bottom:1px solid #ccc;">' + escapeHtml(r.city + r.town + (r.ext ? ' ' + r.ext : '')) + '</td>' +
+        '</tr>'
+      );
+    });
+    var dateStr = new Date().toLocaleDateString('ja-JP');
+    printArea.innerHTML =
+      '<h2 style="font-family:sans-serif;">福井県 郵便番号・住所 一覧（' + dateStr + '作成）</h2>' +
+      '<table style="border-collapse:collapse; width:100%; font-family:sans-serif; font-size:14px;">' +
+      '<thead><tr>' +
+        '<th style="text-align:left; padding:6px 12px; border-bottom:2px solid #333;">郵便番号</th>' +
+        '<th style="text-align:left; padding:6px 12px; border-bottom:2px solid #333;">住所</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows.join('') + '</tbody></table>';
+    window.print();
+  });
+
+  renderHistoryChips();
+  renderFavoritesChips();
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
